@@ -17,4 +17,10 @@
     <ProjectReference Include="..\Infraestructure\Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Cellear\" />
+    <Folder Include="Controllers\User\" />
+    <Folder Include="Controllers\Wine\" />
+  </ItemGroup>
+
 </Project>
