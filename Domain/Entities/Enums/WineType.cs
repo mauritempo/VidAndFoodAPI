@@ -8,10 +8,10 @@ namespace Domain.Entities.Enums
 {
     public enum WineType
     {
-        Sparklink,
+        Sparklign,
         Red,
-        white,
-        rose
+        White,
+        Rosé
 
     }
 }

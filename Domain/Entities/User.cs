@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Entities.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,7 +20,7 @@ namespace Domain.Entities
 
         [Required]
         public string Password { get; set; }
-        public  Enum RoleUser { get; set; }
+        public  Role RoleUser { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         

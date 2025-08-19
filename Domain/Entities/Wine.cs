@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualBasic;
+﻿using Domain.Entities.Enums;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,11 +18,13 @@ namespace Domain.Entities
 
         [Required]
         public required string Name { get; set; }
-        [Required]
-        public string Region { get; set; }
+        public string WineryName { get; set; }
+        public string RegionName { get; set; }
+        public string CountryName { get; set; }
+
 
         [Required]
-        public Enum WyneType { get; set; }
+        public WineType WyneType { get; set; }
 
         public int VintageYear { get; set; }
         public string? LabelImageUrl { get; set; }
@@ -29,10 +32,9 @@ namespace Domain.Entities
 
         public string? Aroma { get; set; }
 
-        
+        public bool IsActive { get; set; } = true;
 
-        public WineGrapeVariety { get; set; }
-        public WineTypeId  { get; set; }
-        public WineryIid  { get; set; }
+        public ICollection<WineGrapeVariety> Blend { get; set; } = new();
+        public ICollection<WineUser> WineUsers { get; set; } = new();
     }
 }
