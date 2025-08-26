@@ -13,17 +13,21 @@ namespace Domain.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required] public int WineUserId { get; set; }
-        public WineUser? WineUser { get; set; }
+        [Required] 
+        public int WineUserId { get; set; }
+        
 
-        [Required] public int CellarPhysicsId { get; set; }
-        public CellarPhysics? CellarPhysics { get; set; }
+        [Required] 
+        public int CellarPhysicsId { get; set; }
 
         public int Quantity { get; set; }
-        public decimal? PurchasePrice { get; set; } // (18,2)
-        public string? LocationNote { get; set; }   // estante/posición
+        public string? LocationNote { get; set; }
 
-        // (WineId implícito vía WineUser → simplifica integridad con el usuario)
+
+        public CellarPhysics? CellarPhysics { get; set; }
+        public WineUser? WineUser { get; set; }
+
+
     }
 
 }

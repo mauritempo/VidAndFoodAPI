@@ -24,8 +24,7 @@ namespace Domain.Entities
 
         public string TastingNotes { get; set; }
         public string Opinion { get; set; }
-        //public visibility visibility { get; set; }   chekear
-        public CellarPhysics PrimaryCellearPhysisId { get; set; }
+        public CellarPhysics CellearPhysisId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
     }

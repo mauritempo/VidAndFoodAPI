@@ -21,7 +21,6 @@ namespace Domain.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public ICollection<WineUserCellarItem> Items { get; set; } = new List<WineUserCellarItem>();
     }
 
 }

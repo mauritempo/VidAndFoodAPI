@@ -17,7 +17,7 @@ namespace Domain.Entities
         public int Id { get; set; }
 
         [Required]
-        public required string Name { get; set; }
+        public string Name { get; set; }
         public string WineryName { get; set; }
         public string RegionName { get; set; }
         public string CountryName { get; set; }
@@ -34,7 +34,5 @@ namespace Domain.Entities
 
         public bool IsActive { get; set; } = true;
 
-        public ICollection<WineGrapeVariety> Blend { get; set; } = new();
-        public ICollection<WineUser> WineUsers { get; set; } = new();
     }
 }
