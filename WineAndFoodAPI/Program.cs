@@ -1,26 +1,31 @@
 using Domain.Interfaces;
+using Infrastructure;
 using Infrastructure.Repository;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+#region Database
+string connectionString = builder.Configuration["ConnectionStrings:WineAndFoodDBConnectionString"]!;
+var connection = new SqliteConnection(connectionString);
+connection.Open();
+builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseSqlite(connection));
+#endregion
+
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 #region Repositories
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-
 #endregion
 
-string connectionString = builder.Configuration["ConnectionStrings:WineAndFoodDBConnectionString"]!;
+;
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

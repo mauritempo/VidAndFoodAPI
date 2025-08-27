@@ -10,7 +10,7 @@ namespace Infrastructure.Repository
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        protected readonly WineDBContext _context;
+        public readonly WineDBContext _context;
         
 
         public BaseRepository(WineDBContext context)

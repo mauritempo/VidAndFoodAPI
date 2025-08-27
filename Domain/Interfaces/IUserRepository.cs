@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface IUserRepository: IBaseRepository<User>
+    public interface IUserRepository
     {
-
+        public Task<User?> GetUser(string email, string password);
     }
 }

@@ -7,7 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\Wine\**" />
+    <Content Remove="Controllers\Wine\**" />
+    <EmbeddedResource Remove="Controllers\Wine\**" />
+    <None Remove="Controllers\Wine\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
@@ -19,7 +30,6 @@
   <ItemGroup>
     <Folder Include="Controllers\Cellear\" />
     <Folder Include="Controllers\User\" />
-    <Folder Include="Controllers\Wine\" />
   </ItemGroup>
 
 </Project>

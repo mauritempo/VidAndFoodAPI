@@ -9,13 +9,16 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repository
 {
-    public class UserRepository : BaseRepository<User>, IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly WineDBContext _dbContext;
-        public UserRepository(WineDBContext dbContext) : base(dbContext)
+        public UserRepository(WineDBContext dbContext) 
         {
             _dbContext = dbContext;
         }
-
+        public async Task<User?> GetUser(string email, string password)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email && x.Password == password);
+        }
     }
 }
