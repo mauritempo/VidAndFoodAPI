@@ -24,7 +24,7 @@ namespace Domain.Entities
 
 
         [Required]
-        public WineType WyneType { get; set; }
+        public WineType WineType { get; set; }
 
         public int VintageYear { get; set; }
         public string? LabelImageUrl { get; set; }
@@ -34,5 +34,9 @@ namespace Domain.Entities
 
         public bool IsActive { get; set; } = true;
 
+        public virtual ICollection<WineGrapeVariety> WineGrapeVarieties { get; set; } = new List<WineGrapeVariety>();
+        public virtual ICollection<WineFavorite> FavoritedByUsers { get; set; } = new List<WineFavorite>();
+        public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+        public virtual ICollection<WineUserCellarItem> CellarItems { get; set; } = new List<WineUserCellarItem>();
     }
 }

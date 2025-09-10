@@ -13,6 +13,7 @@ namespace Domain.Entities
         public int WineId { get; set; }
 
         public int Rate { get; set; } 
+        public bool IsPublic { get; set; }
         public User User { get; set; }
 
         public Wine Wine { get; set; }

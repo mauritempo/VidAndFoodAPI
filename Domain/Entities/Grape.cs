@@ -15,5 +15,7 @@ namespace Domain.Entities
         [Required]
         public string Name { get; set; }
 
+        public virtual ICollection<WineGrapeVariety> WineGrapeVarieties { get; set; } = new List<WineGrapeVariety>(); // <-- Agregá esta línea
+
     }
 }
