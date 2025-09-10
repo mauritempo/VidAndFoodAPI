@@ -19,23 +19,23 @@ namespace Infrastructure.Repository
             
         }
 
-        public IEnumerable<T> Get()
+        public async Task<List<T>> GetAll()
         {
-            return _context.Set<T>().ToList();
+            return await _context.Set<T>().ToListAsync();
         }
-        public T GetById(int id)
+        public async Task<T> GetById<TId>(TId id)
         {
-            return _context.Set<T>().Find(id);
+            return await _context.Set<T>().FindAsync(new object[] { id });
         }
         public void Add(T entity)
         {
             _context.Set<T>().Add(entity);
-            _context.SaveChanges();
+           
         }
         public void Update(T entity)
         {
-            _context.Entry(entity).State = EntityState.Modified;
-            _context.SaveChanges();
+           _context.Set<T>().Update(entity);
+            
         }
         
         //public void Delete(int id) {
