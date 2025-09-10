@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
-using static Application.DTOs.Gemini.Gemini;
+using static Application.Models.Gemini.Gemini;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Infrastructure.Services
@@ -49,7 +49,7 @@ namespace Infrastructure.Services
 
             var result = await httpResp.Content.ReadFromJsonAsync<GeminiGenerateContentResponse>(cancellationToken: ct);
 
-            // EXTRAER TEXTO: candidates[0].content.parts[].text
+            
             var text =
                 result?.Candidates?
                       .FirstOrDefault()?
@@ -60,8 +60,8 @@ namespace Infrastructure.Services
                       .ToArray();
 
             return (text is { Length: > 0 })
-                ? string.Concat(text)       // concatena todas las parts de texto
-                : string.Empty;             // fallback seguro
+                ? string.Concat(text)       
+                : string.Empty;             
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using Application.DTOs.Gemini;
-using Infrastructure.Services;
+﻿using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using System.Net.NetworkInformation;
+using Application.Models.Gemini;
 
 namespace WineAndFoodAPI.Controllers
 {
@@ -17,7 +17,7 @@ namespace WineAndFoodAPI.Controllers
                 _gemini = gemini;
             }
 
-            // GET simple de demo
+            
             [HttpGet]
             public async Task<IActionResult> GetExplainAi(CancellationToken ct)
             {
@@ -36,7 +36,7 @@ namespace WineAndFoodAPI.Controllers
 
                 var text = await _gemini.GenerateTextAsync(dto.Prompt.Trim(), ct);
             return Ok(new { text });
-        }
+            }
         }
     }
 

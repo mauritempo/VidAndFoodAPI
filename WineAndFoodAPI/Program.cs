@@ -20,6 +20,9 @@ var connection = new SqliteConnection(connectionString);
 connection.Open();
 builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseSqlite(connection));
 #endregion
+
+
+
 #region Options (bind seguro)
 var geminiSection = builder.Configuration.GetSection(GeminiOptions.SectionName);
 
@@ -28,12 +31,12 @@ builder.Services
     .Bind(geminiSection)
     .PostConfigure(o =>
     {
-        // Override por env var si existe
+        
         var fromEnv = Environment.GetEnvironmentVariable("GOOGLE_API_KEY");
         if (!string.IsNullOrWhiteSpace(fromEnv))
             o.ApiKey = fromEnv;
 
-        // Defaults sanos
+        
         o.Model ??= "gemini-2.5-flash";
         o.BaseUrl ??= "https://generativelanguage.googleapis.com/v1beta/";
     })
@@ -43,11 +46,13 @@ builder.Services
     .ValidateOnStart();
 #endregion
 
+
+
 #region Services external APIs (Gemini)
+//generar un objt
 builder.Services.AddHttpClient("geminiHttpClient")
     .ConfigureHttpClient((sp, client) =>
     {
-        // Tomamos BaseUrl desde opciones ya validadas
         var opts = sp.GetRequiredService<IOptions<GeminiOptions>>().Value;
         client.BaseAddress = new Uri(opts.BaseUrl);
         client.Timeout = TimeSpan.FromSeconds(30);
@@ -55,6 +60,8 @@ builder.Services.AddHttpClient("geminiHttpClient")
     .AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy())
     .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy());
 #endregion
+
+
 
 #region Services Application
 builder.Services.AddSingleton<IGeminiClient,GeminiApiService>();
@@ -66,8 +73,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
+
 #region Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 #endregion
 
 ;
