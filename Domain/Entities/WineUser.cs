@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Entities.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -17,15 +18,18 @@ namespace Domain.Entities
         public int UserId { get; set; }
         public User User { get; set; }
 
-        [Required] 
-        public int WineId { get; set; }
-        public Wine Wine { get; set; }
+
+        public string? TastingNotes { get; set; }
+        public string? Opinion { get; set; }
+        public bool  isCellarActive { get; set; } 
 
 
-        public string TastingNotes { get; set; }
-        public string Opinion { get; set; }
-        public CellarPhysics CellearPhysisId { get; set; }
+        public TypeCellar TypeCellar { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
+
+
+        public virtual CellarPhysics CellarPhysics { get; set; } // Para la relación 1:1
+        public virtual ICollection<WineUserCellarItem> CellarItems { get; set; } = new List<WineUserCellarItem>();
     }
 }

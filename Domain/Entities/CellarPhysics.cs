@@ -10,13 +10,13 @@ namespace Domain.Entities
 {
     public class CellarPhysics
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int WineUserId { get; set; }
+        public WineUser WineUser { get; set; }
 
-        [Required] public int UserId { get; set; }  // dueño (sommelier)
-        public User? User { get; set; }
 
-        [Required] public string Name { get; set; } 
+        [Required] public string? Name { get; set; } 
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;

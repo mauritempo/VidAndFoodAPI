@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities.Enums
 {
-    public enum WineType
+    public enum TypeCellar
     {
-        Sparkling,
-        Red,
-        White,
-        Rosé
-
+        History,
+        Cellar
     }
 }

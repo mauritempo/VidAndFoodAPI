@@ -23,7 +23,10 @@ namespace Domain.Entities
         public  Role RoleUser { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        
 
-    }
+        public virtual ICollection<WineUser> WineUsers { get; set; } = new List<WineUser>();
+        public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+        public virtual ICollection<WineFavorite> Favorites { get; set; } = new List<WineFavorite>();
+    
+}
 }

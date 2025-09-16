@@ -10,7 +10,6 @@ namespace Domain.Entities.Enums
     {
         Admin,
         User,
-        Sommellier
-
+        Sommelier
     }
 }

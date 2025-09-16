@@ -15,17 +15,17 @@ namespace Domain.Entities
 
         [Required] 
         public int WineUserId { get; set; }
-        
 
-        [Required] 
-        public int CellarPhysicsId { get; set; }
+        [Required]  
+        public int WineId { get; set; }
 
         public int Quantity { get; set; }
         public string? LocationNote { get; set; }
 
 
-        public CellarPhysics? CellarPhysics { get; set; }
-        public WineUser? WineUser { get; set; }
+        public WineUser WineUser { get; set; }
+
+        public Wine Wine { get; set; }
 
 
     }
