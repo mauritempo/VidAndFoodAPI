@@ -20,14 +20,13 @@ namespace Infrastructure
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<WineFavorite> WineFavorites { get; set; }
 
-        public WineDBContext() { }
         public WineDBContext(DbContextOptions<WineDBContext> options) : base(options)
         {
 
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            
 
            
 
@@ -67,11 +66,8 @@ namespace Infrastructure
                 b.HasIndex(x => x.Name).IsUnique();
             });
 
-            // ============================================
             // Relaciones
-            // ============================================
-
-            // --- User y sus relaciones directas ---
+            
             modelBuilder.Entity<User>(b =>
             {
                 b.HasMany(u => u.WineUsers)
@@ -85,7 +81,6 @@ namespace Infrastructure
                  .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // --- Wine y sus relaciones ---
             modelBuilder.Entity<Wine>(b =>
             {
                 b.HasMany(w => w.Ratings)
@@ -99,7 +94,6 @@ namespace Infrastructure
                  .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // --- WineGrapeVariety (N:N con payload: Wine <-> Grape) ---
             modelBuilder.Entity<WineGrapeVariety>(b =>
             {
                 b.HasKey(x => new { x.WineId, x.GrapeId });
@@ -110,7 +104,7 @@ namespace Infrastructure
                     .OnDelete(DeleteBehavior.Cascade);
 
                 b.HasOne(wgv => wgv.Grape)
-                    .WithMany(g => g.WineGrapeVarieties) // <-- Corregido
+                    .WithMany(g => g.WineGrapeVarieties) 
                     .HasForeignKey(wgv => wgv.GrapeId)
                     .OnDelete(DeleteBehavior.Cascade);
 
@@ -119,7 +113,6 @@ namespace Infrastructure
                         "([Percentage] IS NULL) OR ([Percentage] >= 0 AND [Percentage] <= 100)"));
             });
 
-            // --- WineFavorite (N:N simple: User <-> Wine) ---
             modelBuilder.Entity<WineFavorite>(b =>
             {
                 b.HasKey(x => new { x.UserId, x.WineId });
@@ -135,7 +128,6 @@ namespace Infrastructure
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // --- Rating (Tabla con info extra entre User y Wine) ---
             modelBuilder.Entity<Rating>(b =>
             {
                 b.HasKey(x => x.Id);
@@ -148,7 +140,6 @@ namespace Infrastructure
                 b.Property(x => x.IsPublic).HasDefaultValue(false);
             });
 
-            // --- WineUser (Contenedor de Cava/Historial) ---
             modelBuilder.Entity<WineUser>(b =>
             {
                 b.HasKey(x => x.Id);
@@ -163,7 +154,6 @@ namespace Infrastructure
                 b.Property(x => x.isCellarActive).HasDefaultValue(false);
             });
 
-            // --- WineUserCellarItem (Ítems de la cava) ---
             modelBuilder.Entity<WineUserCellarItem>(b =>
             {
                 b.HasKey(x => x.Id);
@@ -176,19 +166,19 @@ namespace Infrastructure
                     tb.HasCheckConstraint("CK_WineUserCellarItem_Quantity", "[Quantity] > 0"));
             });
 
-            // --- CellarPhysics (1:1 con WineUser) ---
             modelBuilder.Entity<CellarPhysics>(b =>
             {
-                b.HasKey(x => x.WineUserId); // PK compartida
+                b.HasKey(x => x.WineUserId); 
 
                 b.HasOne(cp => cp.WineUser)
-                    .WithOne(wu => wu.CellarPhysics) // <-- Corregido
+                    .WithOne(wu => wu.CellarPhysics) 
                     .HasForeignKey<CellarPhysics>(cp => cp.WineUserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 b.Property(x => x.Name).IsRequired().HasMaxLength(120);
                 b.Property(x => x.IsActive).HasDefaultValue(true);
             });
+            base.OnModelCreating(modelBuilder);
         }
     }
     }

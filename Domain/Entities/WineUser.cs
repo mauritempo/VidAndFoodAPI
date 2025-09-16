@@ -19,8 +19,8 @@ namespace Domain.Entities
         public User User { get; set; }
 
 
-        public string TastingNotes { get; set; }
-        public string Opinion { get; set; }
+        public string? TastingNotes { get; set; }
+        public string? Opinion { get; set; }
         public bool  isCellarActive { get; set; } 
 
 
