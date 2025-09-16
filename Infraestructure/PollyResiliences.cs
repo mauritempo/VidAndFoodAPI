@@ -11,12 +11,15 @@ namespace Infrastructure
 {
     public static class PollyResiliencePolicies
     {
-        public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(ApiClientConfiguration apiClientConfiguration)
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(r => r.StatusCode == HttpStatusCode.BadRequest)
-                .WaitAndRetryAsync(3,attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)) // backoff exponencial
+                
+                .WaitAndRetryAsync(
+                    apiClientConfiguration.RetryCount
+                    ,attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt) * apiClientConfiguration.RetryAttemptInSeconds) // backoff exponencial
                 );
         }
 
@@ -26,14 +29,14 @@ namespace Infrastructure
         /// después de 3 fallos y lo mantiene 30s antes de reintentar.
         /// </summary>
         /// <returns>Política de resiliencia con Circuit Breaker</returns>
-        public static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        public static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy(ApiClientConfiguration apiClientConfiguration)
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(r => r.StatusCode == HttpStatusCode.BadRequest)
                 .CircuitBreakerAsync(
-                    handledEventsAllowedBeforeBreaking: 3,
-                    durationOfBreak: TimeSpan.FromSeconds(30)
+                    apiClientConfiguration.HandleEventsAllowedBeforeBreaking,
+                    durationOfBreak: TimeSpan.FromMinutes(apiClientConfiguration.DurationOfBreakInSeconds)
                 );
         }
     }

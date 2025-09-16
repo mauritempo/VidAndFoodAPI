@@ -49,16 +49,24 @@ builder.Services
 
 
 #region Services external APIs (Gemini)
+ApiClientConfiguration geminiApiRelisienceConfig = new()
+{
+    RetryCount = 2,
+    RetryAttemptInSeconds = 2,
+    DurationOfBreakInSeconds = 50,
+    HandleEventsAllowedBeforeBreaking = 10
+};
+
 //generar un objt
 builder.Services.AddHttpClient("geminiHttpClient")
     .ConfigureHttpClient((sp, client) =>
     {
         var opts = sp.GetRequiredService<IOptions<GeminiOptions>>().Value;
         client.BaseAddress = new Uri(opts.BaseUrl);
-        client.Timeout = TimeSpan.FromSeconds(30);
+        
     })
-    .AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy())
-    .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy());
+    .AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy(geminiApiRelisienceConfig))
+    .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(geminiApiRelisienceConfig));
 #endregion
 
 
