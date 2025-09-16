@@ -52,7 +52,7 @@ builder.Services
 ApiClientConfiguration geminiApiRelisienceConfig = new()
 {
     RetryCount = 2,
-    RetryAttemptInSeconds = 2,
+    RetryAttemptInSeconds = 30,
     DurationOfBreakInSeconds = 50,
     HandleEventsAllowedBeforeBreaking = 10
 };
