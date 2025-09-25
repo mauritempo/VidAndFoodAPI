@@ -35,7 +35,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ./myapp
+          # Upload the contents of the publish folder so the downloaded artifact has the files at the artifact root
+          path: ./myapp/**
 
   deploy:
     runs-on: windows-latest
@@ -63,6 +64,7 @@ jobs:
         with:
           app-name: 'Vid-And-Food-V1'
           slot-name: 'Production'
-          # Point the deploy action at the published output folder
-          package: ./myapp
+          # The download step extracts the artifact into a folder named after the artifact ('.net-app')
+          # Point the deploy action at that folder so it contains the published app files
+          package: ./.net-app
           
