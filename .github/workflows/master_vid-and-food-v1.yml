@@ -24,10 +24,12 @@ jobs:
           dotnet-version: '8.x'
 
       - name: Build application
-        run: dotnet build WineAndFoodAPI.csproj --configuration Release --no-restore
+        # Build the project inside the WineAndFoodAPI folder
+        run: dotnet build WineAndFoodAPI/WineAndFoodAPI.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish VidAndFood/WineAndFoodAPI.csproj -c Release -o "./myapp"
+        # Publish the same project into the myapp folder for deployment
+        run: dotnet publish WineAndFoodAPI/WineAndFoodAPI.csproj -c Release -o "./myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -61,5 +63,6 @@ jobs:
         with:
           app-name: 'Vid-And-Food-V1'
           slot-name: 'Production'
-          package: .
+          # Point the deploy action at the published output folder
+          package: ./myapp
           
