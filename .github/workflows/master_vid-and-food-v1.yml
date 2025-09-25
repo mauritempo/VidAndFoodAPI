@@ -66,5 +66,5 @@ jobs:
           slot-name: 'Production'
           # The download step extracts the artifact into a folder named after the artifact ('.net-app')
           # Point the deploy action at that folder so it contains the published app files
-          package: ./.net-app
+          package: .
           
