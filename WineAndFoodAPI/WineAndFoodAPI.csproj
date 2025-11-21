@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>c24c4f9c-0e72-45f1-ac8c-817a4629650c</UserSecretsId >
+    <UserSecretsId>c24c4f9c-0e72-45f1-ac8c-817a4629650c</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -31,7 +32,6 @@
 
   <ItemGroup>
     <Folder Include="Controllers\Cellear\" />
-    <Folder Include="Controllers\User\" />
   </ItemGroup>
 
 </Project>

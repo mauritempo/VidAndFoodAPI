@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class WineFavorite
+    public class WineFavorite : BaseEntity
     {
         public int UserId { get; set; }
         public int WineId { get; set; }

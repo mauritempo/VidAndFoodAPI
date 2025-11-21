@@ -5,13 +5,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.common;
 
 namespace Domain.Entities
 {
-    public class CellarPhysics
+    public class CellarPhysics: BaseEntity
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        
         public int WineUserId { get; set; }
         public WineUser WineUser { get; set; }
 

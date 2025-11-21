@@ -1,14 +1,23 @@
 using Application.Interfaces;
+using Application.Options;
+using Application.Services;
+using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
 using Infrastructure.Options;
 using Infrastructure.Repository;
+using Infrastructure.Security;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,10 +75,42 @@ builder.Services.AddHttpClient("geminiHttpClient")
     .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(geminiApiRelisienceConfig));
 #endregion
 
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+
+var secret = builder.Configuration["Jwt:Secret"]; // Jwt__Secret
+if (string.IsNullOrWhiteSpace(secret))
+    throw new InvalidOperationException("Configura la variable de entorno Jwt__Secret.");
+
+// DI security
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+// Password hasher
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+// JWT Bearer
+var issuer = builder.Configuration["Jwt:Issuer"] ?? "VidAndFood.Api";
+var audience = builder.Configuration["Jwt:Audience"] ?? "VidAndFood.Client";
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+
+builder.Services
+  .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  .AddJwtBearer(o =>
+  {
+      o.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuerSigningKey = true,
+          IssuerSigningKey = key,
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidIssuer = issuer,
+          ValidAudience = audience,
+      };
+  });
 
 
 #region Services Application
 builder.Services.AddSingleton<IGeminiClient,GeminiApiService>();
+builder.Services.AddScoped<IUserService,UserServices>();
 #endregion
 
 
@@ -77,10 +118,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthorization();
+
 
 
 #region Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 #endregion
 

@@ -10,9 +10,9 @@ namespace Domain.Interfaces
     {
 
         Task<List<T>> GetAll();
-        Task<T> GetById<TId>(TId id);
-        void Add(T item);
+        Task<T> AddAsync(T item);
         void Update(T item);
+        Task<T?> GetByIdAsync<TId>(TId id);
 
 
     }

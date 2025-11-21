@@ -1,10 +1,5 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure
 {
@@ -26,9 +21,9 @@ namespace Infrastructure
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
 
-           
+
+
 
             modelBuilder.Entity<User>()
                 .Property(e => e.RoleUser).HasConversion<string>().HasMaxLength(32);
@@ -43,7 +38,7 @@ namespace Infrastructure
             {
                 b.HasIndex(x => x.Email).IsUnique();
                 b.Property(x => x.Email).IsRequired().HasMaxLength(256);
-                b.Property(x => x.Password).IsRequired().HasMaxLength(256);
+                b.Property(x => x.PasswordHash).IsRequired().HasMaxLength(256);
                 b.Property(x => x.IsActive).HasDefaultValue(true);
             });
 
@@ -67,7 +62,7 @@ namespace Infrastructure
             });
 
             // Relaciones
-            
+
             modelBuilder.Entity<User>(b =>
             {
                 b.HasMany(u => u.WineUsers)
@@ -104,7 +99,7 @@ namespace Infrastructure
                     .OnDelete(DeleteBehavior.Cascade);
 
                 b.HasOne(wgv => wgv.Grape)
-                    .WithMany(g => g.WineGrapeVarieties) 
+                    .WithMany(g => g.WineGrapeVarieties)
                     .HasForeignKey(wgv => wgv.GrapeId)
                     .OnDelete(DeleteBehavior.Cascade);
 
@@ -168,10 +163,10 @@ namespace Infrastructure
 
             modelBuilder.Entity<CellarPhysics>(b =>
             {
-                b.HasKey(x => x.WineUserId); 
+                b.HasKey(x => x.WineUserId);
 
                 b.HasOne(cp => cp.WineUser)
-                    .WithOne(wu => wu.CellarPhysics) 
+                    .WithOne(wu => wu.CellarPhysics)
                     .HasForeignKey<CellarPhysics>(cp => cp.WineUserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
@@ -181,4 +176,4 @@ namespace Infrastructure
             base.OnModelCreating(modelBuilder);
         }
     }
-    }
+}
