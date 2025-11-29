@@ -1,4 +1,6 @@
-﻿using Application.Models.Request.User;
+﻿using Application.Models.Request.Auth;
+using Application.Models.Request.User;
+using Application.Models.Response.Auth;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ namespace Application.Interfaces
 {
     internal interface IAuthentication
     {
-        Task<AuthResponseDto?> LoginAsync(LoginRequestDto request);
+        Task<AuthResponse?> LoginAsync(LoginRequest request);
         string HashPassword(User user, string password);
         bool VerifyPassword(User user, string password);
         string GenerateToken(User user);

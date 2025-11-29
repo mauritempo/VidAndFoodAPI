@@ -4,21 +4,15 @@ using Application.Models.Response.User;
 using Application.Models.Response.Wines;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
-using Domain.Model.DTOs.Wines.Domain.Model.DTOs.Wines;
 using Domain.Model.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
     public class WineUserService : IWineUserService
     {
         private readonly IWineUserRepository _wineUserRepository;
-        private readonly IWineFavouriteRepository wineFavouriteRepository;
-        public WineUserService(IWineUserRepository wineUserRepository)
+        private readonly IWineFavouriteRepository _wineFavouriteRepository;
+        public WineUserService(IWineUserRepository wineUserRepository, IWineFavouriteRepository wineFavouriteRepository)
         {
             _wineUserRepository = wineUserRepository;
             _wineFavouriteRepository = wineFavouriteRepository;
@@ -74,83 +68,65 @@ namespace Application.Services
                 await _wineUserRepository.AddAsync(newHistory);
             }
         }
-        public async Task<UserWineStatusDto> GetUserWineStatus(Guid userId, Guid wineId)
+        public async Task<PagedResult<WineListItemDto>> ListFavoriteWines(Guid userId, int page, int pageSize)
         {
-            // Consultamos las dos tablas en paralelo o secuencial
-            var history = await _wineUserRepository.GetHistoryItemAsync(userId, wineId);
-            var favorite = await wineFavouriteRepository.GetByIdAsync(userId, wineId);
+            // CORRECCIÓN: Usamos el repo de FAVORITOS, no el de usuario
+            var (favorites, totalCount) = await _wineFavouriteRepository.GetPagedFavouriteAsync(userId, page, pageSize);
 
-            return new UserWineStatusDto
-            {
-                WineId = wineId,
-                // Lógica simple de booleanos
-                IsInHistory = history != null,
-                IsFavorite = favorite != null,
+            // Mapeo: WineFavorite -> Wine -> DTO
+            var dtos = favorites
+                .Select(f => f.Wine.ToListItemDto())
+                .ToList();
 
-                // Mapeo condicional
-                TimesConsumed = history?.TimesConsumed ?? 0,
-                PersonalNotes = history?.TastingNotes,
-                // PersonalRating = history?.Rating
-            };
+            return new PagedResult<WineListItemDto>(dtos, totalCount, page, pageSize);
         }
 
-        //public async Task<PagedResult<WineListItemDto>> ListFavoriteWines(Guid userId, int page, int pageSize)
-        //{
-        //    // 1. Llamar al repositorio
-        //    var (favorites, totalCount) = await _wineUserRepository.GetFavoritesAsync(userId, page, pageSize);
+        public async Task ToggleFavorite(Guid userId, Guid wineId)
+        {
+            // CORRECCIÓN: Usamos el método GetByPairAsync del repo de favoritos
+            var existingFav = await _wineFavouriteRepository.GetByPairAsync(userId, wineId);
 
-        //    // 2. Mapeo Manual (Usando tus extensiones)
-        //    // Nota: La entidad 'WineFavorite' tiene una propiedad de navegación 'Wine'
-        //    var dtos = favorites
-        //        .Select(f => f.Wine.ToListItemDto()) // Reusamos el método que creamos antes
-        //        .ToList();
+            if (existingFav != null)
+            {
+                // Si existe, BORRAMOS (Des-likear)
+                await _wineFavouriteRepository.DeleteAsync(existingFav);
+            }
+            else
+            {
+                // Si no existe, CREAMOS (Likear)
+                var newFav = new WineFavorite
+                {
+                    UserId = userId,
+                    WineId = wineId,
+                    CreatedAt = DateTime.UtcNow
+                };
 
-        //    return new PagedResult<WineListItemDto>(dtos, totalCount, page, pageSize);
-        //}
+                // Usamos AddAsync del BaseRepository
+                await _wineFavouriteRepository.AddAsync(newFav);
+            }
+        }
 
-
-        // leer 
-        // En WineUserService.cs
-
-        //public async Task ToggleFavorite(Guid userId, Guid wineId)
-        //{
-        //    // 1. Verificamos si ya existe usando el nuevo método booleano
-        //    bool isFavorite = await _wineUserRepository.IsFavoriteAsync(userId, wineId);
-
-        //    if (isFavorite)
-        //    {
-        //        // 2. Si existe, lo borramos pasando los IDs
-        //        await _wineUserRepository.RemoveFavoriteAsync(userId, wineId);
-        //    }
-        //    else
-        //    {
-        //        // 3. Si NO existe, lo agregamos pasando los IDs
-        //        await _wineUserRepository.AddFavoriteAsync(userId, wineId);
-        //    }
-        //}
-
-
-
-        // 3. Lógica de CONSULTA (El "Merge")
-        // Aquí resolvemos tu duda: ¿Cómo sé si está en los dos lados?
         public async Task<UserWineStatusDto> GetUserWineStatus(Guid userId, Guid wineId)
         {
-            // Consultamos las dos tablas en paralelo o secuencial
+            // Consultamos los dos repositorios por separado
             var history = await _wineUserRepository.GetHistoryItemAsync(userId, wineId);
-            var favorite = await _wineUserRepository.GetFavoriteAsync(userId, wineId);
+
+            // CORRECCIÓN: Usamos IsFavoriteAsync para ser más eficientes (devuelve bool)
+            // O usamos GetByPairAsync si necesitamos el objeto. 
+            // Aquí basta con saber si existe.
+            bool isFavorite = await _wineFavouriteRepository.IsFavoriteAsync(userId, wineId);
 
             return new UserWineStatusDto
             {
                 WineId = wineId,
-                // Lógica simple de booleanos
                 IsInHistory = history != null,
-                IsFavorite = favorite != null,
+                IsFavorite = isFavorite,
 
-                // Mapeo condicional
+                // Datos del historial si existen
                 TimesConsumed = history?.TimesConsumed ?? 0,
                 PersonalNotes = history?.TastingNotes,
-                // PersonalRating = history?.Rating
+                // PersonalRating = history?.Rating (Si agregaste rating al historial)
             };
         }
     }
-}
+    }

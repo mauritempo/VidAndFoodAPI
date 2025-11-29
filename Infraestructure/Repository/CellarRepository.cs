@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repository
 {
-    public class CellearRepository : BaseRepository<CellarPhysics>, ICellearRepository
+    public class CellarRepository : BaseRepository<CellarPhysics>, ICellarRepository
     {
-        public CellearRepository(WineDBContext context) : base(context)
+        public CellarRepository(WineDBContext context) : base(context)
         {
         }
 

@@ -112,6 +112,11 @@ builder.Services
 #region Services Application
 builder.Services.AddSingleton<IGeminiClient,GeminiApiService>();
 builder.Services.AddScoped<IUserService,UserServices>();
+builder.Services.AddScoped<IWineService,WineService>();
+builder.Services.AddScoped<ICellarPhysicsService, CellarPhysicsService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IWineUserService, WineUserService>();
+
 #endregion
 
 
@@ -125,6 +130,13 @@ builder.Services.AddAuthorization();
 
 #region Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IWineRepository, WineRepository>();
+builder.Services.AddScoped<IGrapeRepository, GrapeRepository>();
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+builder.Services.AddScoped<IWineUserRepository, WineUserRepository>();
+builder.Services.AddScoped<IWineFavouriteRepository, WineFavouriteRepository>();
+builder.Services.AddScoped<ICellarItemRepository, CellarItemRepository>();
+builder.Services.AddScoped<ICellarRepository, CellarRepository>();
 
 
 #endregion
@@ -141,6 +153,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

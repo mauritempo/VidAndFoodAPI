@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repository
 {
-    public class CellearItemRepository : BaseRepository<WineUserCellarItem>, ICellearItemRepository
+    public class CellarItemRepository : BaseRepository<WineUserCellarItem>, ICellarItemRepository
     {
-        public CellearItemRepository(WineDBContext context) : base(context)
+        public CellarItemRepository(WineDBContext context) : base(context)
         {
         }
         public async Task<(List<WineUserCellarItem> Items, int TotalCount)> GetInventoryAsync(Guid cellarId, int page, int pageSize)
@@ -54,4 +54,4 @@ namespace Infrastructure.Repository
         }
     }
 }
-}
+

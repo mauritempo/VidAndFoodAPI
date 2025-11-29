@@ -1,6 +1,7 @@
-﻿
-using Application.Interfaces;
-using Application.Models.Request.User;
+﻿using Application.Interfaces;
+using Application.mapper;
+using Application.Models.Request.Auth;  // <--- Tus nuevos DTOs de Request
+using Application.Models.Response.Auth; // <--- Tus nuevos DTOs de Response
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -29,28 +30,23 @@ namespace Application.Services
             _configuration = configuration;
         }
 
-        public async Task<AuthResponseDto?> LoginAsync(LoginRequestDto request)
+        public async Task<AuthResponse?> LoginAsync(LoginRequest request) // <--- Nombre limpio
         {
+            // 1. Buscar usuario
             var user = await _userRepository.GetByEmailAsync(request.Email);
             if (user == null) return null;
 
+            // 2. Verificar contraseña
             if (!VerifyPassword(user, request.Password))
                 return null;
 
-            return new AuthResponseDto
+            // 3. Generar respuesta usando el DTO limpio y el Mapeador
+            return new AuthResponse
             {
                 Token = GenerateToken(user),
                 RefreshToken = GenerateRefreshToken(),
                 ExpiresAt = GetTokenExpirationTime(),
-                User = new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    FullName = user.FullName,
-                    Role = user.RoleUser,
-                    CreatedAt = user.CreatedAt,
-                    IsActive = user.IsActive
-                }
+                User = user.ToDto() // <--- ¡Mapeo reutilizable! (UserMappingExtensions)
             };
         }
 
@@ -73,7 +69,8 @@ namespace Application.Services
 
             var claims = new List<Claim>
             {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                // USAMOS UUID para ser consistentes con el UserDto que devolvemos
+                new(ClaimTypes.NameIdentifier, user.UuId.ToString()),
                 new(ClaimTypes.Email, user.Email),
                 new(ClaimTypes.Role, user.RoleUser.ToString())
             };
@@ -101,7 +98,7 @@ namespace Application.Services
 
         public DateTime GetTokenExpirationTime()
         {
-            return DateTime.UtcNow.AddHours(1); 
+            return DateTime.UtcNow.AddHours(1);
         }
     }
 }

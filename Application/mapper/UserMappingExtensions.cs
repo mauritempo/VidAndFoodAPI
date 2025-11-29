@@ -1,4 +1,5 @@
 ﻿using Application.Models.Request.User;
+using Application.Models.Response.User;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,19 @@ namespace Application.mapper
 
             return new UserDto
             {
-                Id = entity.UuId, // Asegúrate que tu User tenga Id int o Guid
+                // Mapeamos el UUID de la base de datos al Id del DTO
+                Id = entity.UuId,
+
                 Email = entity.Email,
                 FullName = entity.FullName,
-                Role = entity.RoleUser, // Asumiendo que en BD se llama RoleUser
+                Role = entity.RoleUser,
                 IsActive = entity.IsActive
+
+                // Si agregaste CreatedAt al UserDto, agrégalo aquí también:
+                // CreatedAt = entity.CreatedAt
             };
         }
+
+
     }
 }

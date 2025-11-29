@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces.Repositories
 {
-    public interface ICellearItemRepository : IBaseRepository<WineUserCellarItem>
+    public interface ICellarItemRepository : IBaseRepository<WineUserCellarItem>
     {
         Task<(List<WineUserCellarItem> Items, int TotalCount)> GetInventoryAsync(Guid cellarId, int page, int pageSize);
         Task<WineUserCellarItem?> GetItemAsync(Guid cellarId, Guid wineId);

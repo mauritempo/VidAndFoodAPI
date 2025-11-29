@@ -6,15 +6,15 @@ using Domain.Interfaces.Repositories;
 
 namespace Application.Services
 {
-    public class CellarPhysicsService
+    public class CellarPhysicsService : ICellarPhysicsService
     {
-        private readonly ICellearRepository _cellarRepository;
-        private readonly ICellearItemRepository _itemRepository;
+        private readonly ICellarRepository _cellarRepository;
+        private readonly ICellarItemRepository _itemRepository;
         private readonly IWineUserService _wineUserService;
 
         public CellarPhysicsService(
-            ICellearRepository cellarRepository,
-            ICellearItemRepository itemRepository,
+            ICellarRepository cellarRepository,
+            ICellarItemRepository itemRepository,
             IWineUserService wineUserService)
         {
             _cellarRepository = cellarRepository;

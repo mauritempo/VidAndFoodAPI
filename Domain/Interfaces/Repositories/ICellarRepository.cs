@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces.Repositories
 {
-    public interface ICellearRepository : IBaseRepository<CellarPhysics>
+    public interface ICellarRepository : IBaseRepository<CellarPhysics>
     {
         Task<List<CellarPhysics>> GetUserCellarsAsync(Guid userId);
     }

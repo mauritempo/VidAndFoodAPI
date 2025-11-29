@@ -19,15 +19,15 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.CellarPhysics", b =>
                 {
-                    b.Property<int>("WineUserId")
+                    b.Property<Guid>("UuId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Capacity")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -36,22 +36,27 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(120)
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("WineUserId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("UuId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("CellarPhysics");
                 });
 
             modelBuilder.Entity("Domain.Entities.Grape", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -67,7 +72,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("UuId");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -77,9 +82,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Rating", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -90,38 +95,52 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsPublic")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(true);
 
-                    b.Property<int>("Rate")
+                    b.Property<string>("Review")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Score")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("WineId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid?>("UserUuId")
+                        .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("WineUuId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("UuId");
+
+                    b.HasIndex("UserUuId");
 
                     b.HasIndex("WineId");
+
+                    b.HasIndex("WineUuId");
 
                     b.HasIndex("UserId", "WineId")
                         .IsUnique();
 
                     b.ToTable("Ratings", t =>
                         {
-                            t.HasCheckConstraint("CK_Rating_Rate", "[Rate] >= 0 AND [Rate] <= 5");
+                            t.HasCheckConstraint("CK_Rating_Score", "[Score] >= 1 AND [Score] <= 5");
                         });
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -152,7 +171,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("UuId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -162,17 +181,23 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Wine", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Aroma")
                         .HasMaxLength(1024)
                         .HasColumnType("TEXT");
 
+                    b.Property<double>("AverageScore")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("CountryName")
                         .IsRequired()
                         .HasMaxLength(160)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
@@ -186,8 +211,15 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(160)
                         .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RatingCount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("RegionName")
                         .IsRequired()
@@ -196,6 +228,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("TastingNotes")
                         .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("VintageYear")
@@ -211,7 +246,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("UuId");
 
                     b.HasIndex("Name", "VintageYear");
 
@@ -220,23 +255,23 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.WineFavorite", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("WineId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UuId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "WineId");
@@ -248,11 +283,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.WineGrapeVariety", b =>
                 {
-                    b.Property<int>("WineId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("GrapeId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("GrapeId")
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("Percentage")
                         .HasColumnType("INTEGER");
@@ -269,9 +304,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.WineUser", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -279,95 +314,121 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Opinion")
-                        .HasMaxLength(1024)
+                    b.Property<DateTime?>("LastConsumedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TastingNotes")
-                        .HasMaxLength(2048)
+                        .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("TypeCellar")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("TEXT");
+                    b.Property<int>("TimesConsumed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<bool>("isCellarActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false);
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("UuId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("WineId");
+
+                    b.HasIndex("UserId", "WineId")
+                        .IsUnique();
 
                     b.ToTable("WineUsers");
                 });
 
             modelBuilder.Entity("Domain.Entities.WineUserCellarItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CellarPhysicsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("LocationNote")
-                        .HasMaxLength(160)
+                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("PurchasePrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(1);
 
-                    b.Property<int>("WineId")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("WineUserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("UuId");
 
                     b.HasIndex("WineId");
 
-                    b.HasIndex("WineUserId", "WineId")
+                    b.HasIndex("CellarPhysicsId", "WineId")
                         .IsUnique();
 
                     b.ToTable("WineUserCellarItems", t =>
                         {
-                            t.HasCheckConstraint("CK_WineUserCellarItem_Quantity", "[Quantity] > 0");
+                            t.HasCheckConstraint("CK_CellarItem_Quantity", "[Quantity] > 0");
                         });
                 });
 
             modelBuilder.Entity("Domain.Entities.CellarPhysics", b =>
                 {
-                    b.HasOne("Domain.Entities.WineUser", "WineUser")
-                        .WithOne("CellarPhysics")
-                        .HasForeignKey("Domain.Entities.CellarPhysics", "WineUserId")
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("WineUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Rating", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("Ratings")
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Wine", "Wine")
+                    b.HasOne("Domain.Entities.User", null)
                         .WithMany("Ratings")
+                        .HasForeignKey("UserUuId");
+
+                    b.HasOne("Domain.Entities.Wine", "Wine")
+                        .WithMany()
                         .HasForeignKey("WineId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Domain.Entities.Wine", null)
+                        .WithMany("Ratings")
+                        .HasForeignKey("WineUuId");
 
                     b.Navigation("User");
 
@@ -420,26 +481,39 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.Wine", "Wine")
+                        .WithMany()
+                        .HasForeignKey("WineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("User");
+
+                    b.Navigation("Wine");
                 });
 
             modelBuilder.Entity("Domain.Entities.WineUserCellarItem", b =>
                 {
+                    b.HasOne("Domain.Entities.CellarPhysics", "CellarPhysics")
+                        .WithMany("Items")
+                        .HasForeignKey("CellarPhysicsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Wine", "Wine")
                         .WithMany("CellarItems")
                         .HasForeignKey("WineId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.WineUser", "WineUser")
-                        .WithMany("CellarItems")
-                        .HasForeignKey("WineUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("CellarPhysics");
 
                     b.Navigation("Wine");
+                });
 
-                    b.Navigation("WineUser");
+            modelBuilder.Entity("Domain.Entities.CellarPhysics", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Domain.Entities.Grape", b =>
@@ -465,13 +539,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Ratings");
 
                     b.Navigation("WineGrapeVarieties");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WineUser", b =>
-                {
-                    b.Navigation("CellarItems");
-
-                    b.Navigation("CellarPhysics");
                 });
 #pragma warning restore 612, 618
         }

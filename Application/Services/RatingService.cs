@@ -1,4 +1,5 @@
-﻿using Application.Models.Request.Request;
+﻿using Application.Interfaces;
+using Application.Models.Request.Request;
 using Application.Models.Response.Rating;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
@@ -10,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-        public class RatingService
-        {
+        public class RatingService : IRatingService
+    {
             private readonly IRatingRepository _ratingRepository;
             private readonly IWineRepository _wineRepository;
 
@@ -81,6 +82,11 @@ namespace Application.Services
                     CreatedAt = r.CreatedAt
                 }).ToList();
             }
+
+        Task IRatingService.UpdateWineStatistics(Guid wineId)
+        {
+            return UpdateWineStatistics(wineId);
         }
+    }
     }
 
