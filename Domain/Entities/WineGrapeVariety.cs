@@ -10,8 +10,8 @@ namespace Domain.Entities
 {
     public class WineGrapeVariety
     {
-        public int GrapeId { get; set; }
-        public int WineId { get; set; }
+        public Guid GrapeId { get; set; }
+        public Guid WineId { get; set; }
         public Wine Wine { get; set; } 
         
         public Grape Grape { get; set; }

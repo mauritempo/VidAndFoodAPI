@@ -9,8 +9,8 @@ namespace Domain.Entities
 {
     public class WineFavorite : BaseEntity
     {
-        public int UserId { get; set; }
-        public int WineId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid WineId { get; set; }
 
         public User User { get; set; } = null!;
         public Wine Wine { get; set; } = null!;

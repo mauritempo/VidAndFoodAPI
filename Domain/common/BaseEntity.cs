@@ -12,7 +12,7 @@ namespace Domain.common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid UuId  { get; set; } = Guid.NewGuid();
 
         public bool IsActive { get; set; } = true;
 

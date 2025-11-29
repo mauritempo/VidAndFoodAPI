@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Models.Request.User
+namespace Application.Models.Response.User
 {
-    public class UserCreateDto
+    public class UserDto
     {
+        public int Id { get; set; } // O Guid, segun tu entidad User
         public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
-        public Role? Role { get; set; }
+        public Role Role { get; set; }
+        public bool IsActive { get; set; }
     }
 }

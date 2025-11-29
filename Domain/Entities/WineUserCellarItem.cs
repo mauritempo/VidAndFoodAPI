@@ -10,23 +10,22 @@ namespace Domain.Entities
 {
     public class WineUserCellarItem
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 
-        [Required] 
-        public int WineUserId { get; set; }
+        [Required]
+        public Guid CellarPhysicsId { get; set; }
+        public virtual CellarPhysics CellarPhysics { get; set; }
 
-        [Required]  
-        public int WineId { get; set; }
+
+        [Required]
+        public Guid WineId { get; set; }
+        public virtual Wine Wine { get; set; }
+
 
         public int Quantity { get; set; }
         public string? LocationNote { get; set; }
-
-
-        public WineUser WineUser { get; set; }
-
-        public Wine Wine { get; set; }
-
+        public decimal? PurchasePrice { get; set; } 
+        public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
     }
 

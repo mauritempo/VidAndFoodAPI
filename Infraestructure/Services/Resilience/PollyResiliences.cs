@@ -3,7 +3,7 @@ using Polly.Extensions.Http;
 using System.Net;
 
 
-namespace Infrastructure
+namespace Infrastructure.Services.Resilience
 {
     public static class PollyResiliencePolicies
     {

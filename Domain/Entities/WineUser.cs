@@ -14,19 +14,18 @@ namespace Domain.Entities
     public class WineUser : BaseEntity
     {
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public User User { get; set; }
 
 
+        [Required]
+        public Guid WineId { get; set; }
+        public Wine Wine { get; set; }
+
+
         public string? TastingNotes { get; set; }
-        public string? Opinion { get; set; }
-        public bool  isCellarActive { get; set; } 
+        public int TimesConsumed { get; set; } // Contador de veces bebido
+        public DateTime? LastConsumedAt { get; set; } // Cuándo fue la última vez
 
-
-        public TypeCellar TypeCellar { get; set; }
-
-
-        public virtual CellarPhysics? CellarPhysics { get; set; } 
-        public virtual ICollection<WineUserCellarItem> CellarItems { get; set; } = new List<WineUserCellarItem>();
     }
 }

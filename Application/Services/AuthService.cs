@@ -2,7 +2,7 @@
 using Application.Interfaces;
 using Application.Models.Request.User;
 using Domain.Entities;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

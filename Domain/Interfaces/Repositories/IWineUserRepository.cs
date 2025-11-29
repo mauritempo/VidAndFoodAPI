@@ -1,0 +1,15 @@
+﻿using Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Domain.Interfaces.Repositories
+{
+    public interface IWineUserRepository : IBaseRepository<WineUser>
+    {
+        Task<WineUser?> GetHistoryItemAsync(Guid userId, Guid wineId);
+        Task<List<WineUser>> GetUserHistoryAsync(Guid userId);
+    }
+}
