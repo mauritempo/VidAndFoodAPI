@@ -41,9 +41,9 @@ namespace Application.Services
             return new AuthResponse
             {
                 Token = GenerateToken(user),
-                RefreshToken = GenerateRefreshToken(),
-                ExpiresAt = GetTokenExpirationTime(),
-                User = user.ToDto() // <--- ¡Mapeo reutilizable! (UserMappingExtensions)
+                //RefreshToken = GenerateRefreshToken(),
+                //ExpiresAt = GetTokenExpirationTime(),
+                //User = user.ToDto() 
             };
         }
 
