@@ -32,15 +32,12 @@ namespace Application.Services
 
         public async Task<AuthResponse?> LoginAsync(LoginRequest request) // <--- Nombre limpio
         {
-            // 1. Buscar usuario
             var user = await _userRepository.GetByEmailAsync(request.Email);
             if (user == null) return null;
 
-            // 2. Verificar contraseña
             if (!VerifyPassword(user, request.Password))
                 return null;
 
-            // 3. Generar respuesta usando el DTO limpio y el Mapeador
             return new AuthResponse
             {
                 Token = GenerateToken(user),
@@ -64,12 +61,11 @@ namespace Application.Services
         public string GenerateToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured")));
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret not configured")));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
             {
-                // USAMOS UUID para ser consistentes con el UserDto que devolvemos
                 new(ClaimTypes.NameIdentifier, user.UuId.ToString()),
                 new(ClaimTypes.Email, user.Email),
                 new(ClaimTypes.Role, user.RoleUser.ToString())

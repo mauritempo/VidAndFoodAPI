@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Application.Models.Request.Auth;
 using Application.Models.Request.User;
 using Application.Services;
 using Domain.Entities.Enums;
@@ -13,9 +14,11 @@ namespace WineAndFoodAPI.Controllers.User
     public class UserController : ControllerBase
     {
         private readonly IUserService _service;
-        public UserController(IUserService service)
+        private readonly IAuthentication _authService;
+        public UserController(IUserService service, IAuthentication authentication)
         {
             _service = service;
+            _authService = authentication;
         }
 
 
@@ -34,6 +37,17 @@ namespace WineAndFoodAPI.Controllers.User
             var user = await _service.CreateUserAsync(userForCreate);
 
             return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var authResponse = await _authService.LoginAsync(loginRequest);
+            if (authResponse == null)
+                return Unauthorized("Invalid email or password.");
+            return Ok(authResponse);
         }
 
     }

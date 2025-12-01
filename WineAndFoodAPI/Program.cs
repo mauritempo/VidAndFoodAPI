@@ -116,6 +116,7 @@ builder.Services.AddScoped<IWineService,WineService>();
 builder.Services.AddScoped<ICellarPhysicsService, CellarPhysicsService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IWineUserService, WineUserService>();
+builder.Services.AddScoped<IAuthentication, AuthService>();
 
 #endregion
 
@@ -123,6 +124,8 @@ builder.Services.AddScoped<IWineUserService, WineUserService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Configuration.AddEnvironmentVariables();
+
 
 builder.Services.AddAuthorization();
 

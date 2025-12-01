@@ -10,9 +10,9 @@ namespace Application.Models.Request.User
         public class AuthResponseDto
         {
             public string Token { get; set; }
-            public string RefreshToken { get; set; }
-            public DateTime ExpiresAt { get; set; }
-            public UserDto User { get; set; } = null!;
+            //public string RefreshToken { get; set; }
+            //public DateTime ExpiresAt { get; set; }
+            //public UserDto User { get; set; } = null!;
         }
 }
 

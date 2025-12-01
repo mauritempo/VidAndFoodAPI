@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
-    internal interface IAuthentication
+    public interface IAuthentication
     {
         Task<AuthResponse?> LoginAsync(LoginRequest request);
         string HashPassword(User user, string password);
