@@ -1,5 +1,6 @@
 ﻿using Application.Models.Response.User;
 using Application.Models.Response.Wines;
+using Domain.Model.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,11 @@ namespace Application.Interfaces
 {
     public interface IWineUserService
     {
-        Task<List<WineListItemDto>> GetHistoryList(Guid userId);
-        Task RegisterConsumption(Guid userId, Guid wineId, string notes);
-        Task<UserWineStatusDto> GetUserWineStatus(Guid userId, Guid wineId);
+        Task<PagedResult<WineListItemDto>> GetHistoryList(int page, int pageSize);
+        Task RegisterConsumption(Guid wineId, string notes);
+        Task<PagedResult<WineListItemDto>> ListFavoriteWines(int page, int pageSize);
+        Task ToggleFavorite(Guid wineId);
+        Task<UserWineStatusDto> GetUserWineStatus(Guid wineId);
+
     }
 }

@@ -10,6 +10,6 @@ namespace Domain.Interfaces.Repositories
     public interface IWineUserRepository : IBaseRepository<WineUser>
     {
         Task<WineUser?> GetHistoryItemAsync(Guid userId, Guid wineId);
-        Task<List<WineUser>> GetUserHistoryAsync(Guid userId);
+        Task<(List<WineUser> Items, int TotalCount)> GetPagedHistoryAsync(Guid userId, int page, int pageSize);
     }
 }

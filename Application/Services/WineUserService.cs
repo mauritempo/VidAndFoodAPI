@@ -3,6 +3,7 @@ using Application.mapper;
 using Application.Models.Response.User;
 using Application.Models.Response.Wines;
 using Domain.Entities;
+using Domain.Entities.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Model.Shared;
 
@@ -12,31 +13,36 @@ namespace Application.Services
     {
         private readonly IWineUserRepository _wineUserRepository;
         private readonly IWineFavouriteRepository _wineFavouriteRepository;
-        public WineUserService(IWineUserRepository wineUserRepository, IWineFavouriteRepository wineFavouriteRepository)
+        private readonly ICurrentUser _currentUser;
+        public WineUserService(IWineUserRepository wineUserRepository, IWineFavouriteRepository wineFavouriteRepository, ICurrentUser currentUser)
         {
             _wineUserRepository = wineUserRepository;
             _wineFavouriteRepository = wineFavouriteRepository;
+            _currentUser = currentUser;
         }
 
 
 
-        public async Task<List<WineListItemDto>> GetHistoryList(Guid userId)
+        public async Task<PagedResult<WineListItemDto>> GetHistoryList( int page, int pageSize)
         {
-            // 1. El repositorio te da la lista de relaciones (WineUser)
-            var historyList = await _wineUserRepository.GetUserHistoryAsync(userId);
-
-            // 2. Transformás esa lista en DTOs de vinos
-            // Nota: Accedemos a la propiedad .Wine de cada registro del historial
-            var dtos = historyList
+            var userId = _currentUser.UserId;
+            var (historyItems, totalCount) = await _wineUserRepository.GetPagedHistoryAsync(userId, page, pageSize);
+            var dtos = historyItems
                 .Select(h => h.Wine.ToListItemDto())
                 .ToList();
-
-            return dtos;
+            return new PagedResult<WineListItemDto>(dtos, totalCount, page, pageSize);
         }
 
 
-        public async Task RegisterConsumption(Guid userId, Guid wineId, string notes)
+        public async Task RegisterConsumption(Guid wineId, string notes)
         {
+            if (_currentUser.Role == Role.User)
+            {
+                throw new UnauthorizedAccessException("Mejora tu cuenta para registrar tus catas.");
+
+            }
+
+            var userId = _currentUser.UserId;
 
             var history = await _wineUserRepository.GetHistoryItemAsync(userId, wineId);
 
@@ -50,7 +56,6 @@ namespace Application.Services
                     history.TastingNotes = notes;
                 }
 
-                // Llamamos al nuevo método de update
                 await _wineUserRepository.UpdateAsync(history);
             }
             else
@@ -64,26 +69,26 @@ namespace Application.Services
                     TastingNotes = notes,
                 };
 
-                // Pasamos la entidad completa para guardar notas y fechas
                 await _wineUserRepository.AddAsync(newHistory);
             }
         }
-        public async Task<PagedResult<WineListItemDto>> ListFavoriteWines(Guid userId, int page, int pageSize)
+        public async Task<PagedResult<WineListItemDto>> ListFavoriteWines(int page, int pageSize)
         {
-            // CORRECCIÓN: Usamos el repo de FAVORITOS, no el de usuario
-            var (favorites, totalCount) = await _wineFavouriteRepository.GetPagedFavouriteAsync(userId, page, pageSize);
+            if (_currentUser.Role == Role.User)
+            {
+                throw new UnauthorizedAccessException("Esta funcionalidad es exclusiva para Sommeliers.");
+            }
 
-            // Mapeo: WineFavorite -> Wine -> DTO
-            var dtos = favorites
-                .Select(f => f.Wine.ToListItemDto())
-                .ToList();
+            var userId = _currentUser.UserId;
+            var (favorites, totalCount) = await _wineFavouriteRepository.GetPagedFavouriteAsync(userId, page, pageSize);
+            var dtos = favorites.Select(f => f.Wine.ToListItemDto()).ToList();
 
             return new PagedResult<WineListItemDto>(dtos, totalCount, page, pageSize);
         }
 
-        public async Task ToggleFavorite(Guid userId, Guid wineId)
+        public async Task ToggleFavorite(Guid wineId)
         {
-            // CORRECCIÓN: Usamos el método GetByPairAsync del repo de favoritos
+            var userId = _currentUser.UserId;
             var existingFav = await _wineFavouriteRepository.GetByPairAsync(userId, wineId);
 
             if (existingFav != null)
@@ -106,14 +111,11 @@ namespace Application.Services
             }
         }
 
-        public async Task<UserWineStatusDto> GetUserWineStatus(Guid userId, Guid wineId)
+        public async Task<UserWineStatusDto> GetUserWineStatus(Guid wineId)
         {
-            // Consultamos los dos repositorios por separado
+            var userId = _currentUser.UserId;
             var history = await _wineUserRepository.GetHistoryItemAsync(userId, wineId);
 
-            // CORRECCIÓN: Usamos IsFavoriteAsync para ser más eficientes (devuelve bool)
-            // O usamos GetByPairAsync si necesitamos el objeto. 
-            // Aquí basta con saber si existe.
             bool isFavorite = await _wineFavouriteRepository.IsFavoriteAsync(userId, wineId);
 
             return new UserWineStatusDto
@@ -125,7 +127,6 @@ namespace Application.Services
                 // Datos del historial si existen
                 TimesConsumed = history?.TimesConsumed ?? 0,
                 PersonalNotes = history?.TastingNotes,
-                // PersonalRating = history?.Rating (Si agregaste rating al historial)
             };
         }
     }

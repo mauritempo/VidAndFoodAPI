@@ -35,6 +35,8 @@ namespace Application.Services
             return u?.ToDto();
         }
 
+        
+
         public async Task<UserDto> CreateUserAsync(UserCreateDto dto)
         {
             // Validaciones
@@ -63,17 +65,14 @@ namespace Application.Services
             user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
             // Asignar Rol (con seguridad)
-            var callerRole = _current.Role ?? Role.User;
+            var callerRole = _current.Role;
             if (dto.Role.HasValue && dto.Role.Value != Role.User && callerRole != Role.Admin)
                 throw new UnauthorizedAccessException("Solo un Admin puede asignar roles elevados.");
 
             user.RoleUser = dto.Role ?? Role.User;
 
-            // Guardar en BD
             var addedUser = await _userRepository.AddAsync(user);
 
-            // CORRECCIÓN: Retornamos la entidad guardada convertida a DTO
-            // NO retornes 'dto' porque ese tiene la password en texto plano.
             return addedUser.ToDto();
         }
 
@@ -85,5 +84,35 @@ namespace Application.Services
             // CORRECCIÓN: Usamos la extensión .ToDto()
             return u?.ToDto();
         }
+
+
+
+        //public async Task<UserDto> CreateAdminForceAsync(CreateAdminRequest request)
+        //{
+        //    var email = request.Email.Trim();
+
+        //    // 1. Validar que no exista
+        //    var existing = await _userRepository.GetByEmailAsync(email);
+        //    if (existing != null)
+        //        throw new InvalidOperationException($"El usuario {email} ya existe.");
+
+        //    // 2. Crear la entidad forzando el Rol ADMIN
+        //    var adminUser = new User
+        //    {
+        //        Email = email,
+        //        FullName = request.FullName,
+        //        IsActive = true,
+        //        CreatedAt = DateTime.UtcNow,
+        //        RoleUser = Role.Admin // <--- AQUÍ ESTÁ LA CLAVE
+        //    };
+
+        //    // 3. Hashear password
+        //    adminUser.PasswordHash = _hasher.HashPassword(adminUser, request.Password);
+
+        //    // 4. Guardar
+        //    var created = await _userRepository.AddAsync(adminUser);
+
+        //    return created.ToDto();
+        //}
     }
 }

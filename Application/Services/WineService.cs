@@ -3,6 +3,7 @@ using Application.mapper;
 using Application.Models.Request.Wines;
 using Application.Models.Response.Wines;
 using Domain.Entities;
+using Domain.Entities.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Model.Enums.Wines.Criteria;
 using Domain.Model.Enums.Wines.Criteria.enums;
@@ -13,10 +14,12 @@ namespace Application.Services
     public class WineService  : IWineService 
     {
         private readonly IWineRepository _wineRepository;
+        private readonly ICurrentUser _currentUser;
 
-        public WineService(IWineRepository wineRepository)
+        public WineService(IWineRepository wineRepository, ICurrentUser currentUser)
         {
             _wineRepository = wineRepository;
+            _currentUser = currentUser;
         }
 
         // ==========================================================
@@ -25,6 +28,11 @@ namespace Application.Services
 
         public async Task<WineDetailDto> CreateWine(CreateWineRequest request)
         {
+            var userRole = _currentUser.Role;
+            if (userRole != Role.Admin)
+            {
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden Crear.);
+            }
             var wine = request.ToEntity();
 
             if (request.Grapes != null && request.Grapes.Any())
@@ -46,6 +54,12 @@ namespace Application.Services
 
         public async Task<WineDetailDto> UpdateWine(Guid id, UpdateWineRequest request)
         {
+            var userRole = _currentUser.Role;
+            if (userRole != Role.Admin)
+            {
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden Actualizar.");
+            }
+
             var wine = await _wineRepository.GetForUpdateAsync(id);
 
             if (wine == null)
@@ -67,6 +81,12 @@ namespace Application.Services
 
         public async Task SoftDeleteWine(Guid id)
         {
+            var userRole = _currentUser.Role;
+            if (userRole != Role.Admin)
+            {
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden Eliminar.");
+            }
+
             var wine = await _wineRepository.GetForUpdateAsync(id);
             if (wine == null) throw new KeyNotFoundException($"Vino {id} no encontrado");
 
@@ -77,6 +97,11 @@ namespace Application.Services
 
         public async Task RestoreWine(Guid id)
         {
+            var userRole = _currentUser.Role;
+            if (userRole != Role.Admin)
+            {
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden acceder a esta sección.");
+            }
             var wine = await _wineRepository.GetForUpdateAsync(id);
             if (wine == null) throw new KeyNotFoundException($"Vino {id} no encontrado");
 
@@ -85,12 +110,14 @@ namespace Application.Services
             await _wineRepository.UpdateAsync(wine);
         }
 
-        public async Task<PagedResult<WineAdminListItemDto>> ListWinesAdmin(
-            WineAdminFilterRequest filter, // Asumo que este DTO o Request existe
-            int page,
-            int pageSize,
-            WineAdminSort sort)
+        public async Task<PagedResult<WineAdminListItemDto>> ListWinesAdmin(WineAdminFilterRequest filter,int page,int pageSize,WineAdminSort sort)
         {
+            var userRole = _currentUser.Role;
+            if (userRole != Role.Admin)
+            {
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden acceder a esta sección.");
+            }
+
             var criteria = new WineAdminCriteria
             {
                 SearchTerm = filter.SearchTerm,
@@ -98,17 +125,12 @@ namespace Application.Services
             };
 
             string sortOrder = sort.ToString();
-
             var (items, totalCount) = await _wineRepository.GetAdminListAsync(criteria, page, pageSize, sortOrder);
-
             var dtos = items.Select(w => w.ToAdminDto()).ToList();
 
             return new PagedResult<WineAdminListItemDto>(dtos, totalCount, page, pageSize);
         }
 
-        // ==========================================================
-        //  PUBLIC METHODS
-        // ==========================================================
 
         public async Task<WineDetailDto> GetWineById(Guid id)
         {
@@ -121,11 +143,7 @@ namespace Application.Services
             return wine.ToDetailDto();
         }
 
-        public async Task<PagedResult<WineListItemDto>> SearchWines(
-            WineFilterRequest request, // Corregido: Usamos el nuevo Request
-            int page,
-            int pageSize,
-            WineSort sort)
+        public async Task<PagedResult<WineListItemDto>> SearchWines(WineFilterRequest request,int page,int pageSize,WineSort sort)
         {
             var criteria = new WineSearchCriteria
             {
@@ -145,9 +163,6 @@ namespace Application.Services
             return new PagedResult<WineListItemDto>(dtos, totalCount, page, pageSize);
         }
 
-        // ==========================================================
-        //  HELPERS
-        // ==========================================================
 
         private void UpdateGrapeVarieties(Wine wine, List<Guid> newGrapeIds)
         {

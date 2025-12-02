@@ -9,7 +9,10 @@ namespace Application.Interfaces
 {
     public interface ICurrentUser
     {
-        string? UserId { get; }        
-        Role? Role { get; }            
+        Guid UserId { get; }
+        string Email { get; }
+        Role Role { get; }
+        bool IsAuthenticated { get; }
+        bool IsInRole(string role);
     }
 }

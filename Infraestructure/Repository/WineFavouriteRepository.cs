@@ -20,15 +20,13 @@ namespace Infrastructure.Repository
             var query = _context.Set<WineFavorite>()
                 .AsNoTracking()
                 .Where(f => f.UserId == userId)
-                .Include(f => f.Wine)                // Traer el Vino
-                    .ThenInclude(w => w.WineGrapeVarieties) // Traer relación intermedia
-                        .ThenInclude(wg => wg.Grape)        // Traer nombre de la Uva
-                .OrderByDescending(f => f.CreatedAt); // Los más nuevos arriba
+                .Include(f => f.Wine)                
+                    .ThenInclude(w => w.WineGrapeVarieties) 
+                        .ThenInclude(wg => wg.Grape)  
+                .OrderByDescending(f => f.CreatedAt);
 
-            // Contar antes de paginar
             var totalCount = await query.CountAsync();
 
-            // Paginar
             var items = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

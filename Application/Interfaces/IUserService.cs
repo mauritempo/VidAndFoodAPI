@@ -10,6 +10,7 @@ namespace Application.Interfaces
 {
     public interface IUserService
     {
+        //Task<UserDto> CreateAdminForceAsync(CreateAdminRequest request);
         Task<UserDto?> GetByEmailAsync(string email);
         Task<UserDto> CreateUserAsync(UserCreateDto dto);
         Task<UserDto?> GetByIdAsync(int id);

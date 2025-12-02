@@ -1,27 +1,47 @@
-﻿using Application.Interfaces;        
+﻿using Application.Interfaces;
 using Domain.Entities.Enums;
 using Microsoft.AspNetCore.Http;
-using System.IdentityModel.Tokens.Jwt;          
 using System.Security.Claims;
 
 namespace Infrastructure.Security
 {
     public class CurrentUser : ICurrentUser
     {
-        private readonly IHttpContextAccessor _http;
-        public CurrentUser(IHttpContextAccessor http) => _http = http;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public CurrentUser(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+        private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
-        public string? UserId =>
-            _http.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? _http.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 
-        public Role? Role
+        public Guid UserId
         {
             get
             {
-                var value = _http.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
-                return Enum.TryParse<Role>(value, out var r) ? r : null;
+                var idClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                return string.IsNullOrEmpty(idClaim) ? Guid.Empty : Guid.Parse(idClaim);
             }
+        }
+
+        public string Email => User?.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
+
+        public Role Role
+        {
+            get
+            {
+                var roleString = User?.FindFirst(ClaimTypes.Role)?.Value;
+                if (string.IsNullOrEmpty(roleString)) return Role.User; // Default
+
+                // Convertir string a Enum
+                return Enum.TryParse(roleString, out Role role) ? role : Role.User;
+            }
+        }
+
+        public bool IsInRole(string role)
+        {
+            return User?.IsInRole(role) ?? false;
         }
     }
 }

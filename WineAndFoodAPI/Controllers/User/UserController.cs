@@ -28,7 +28,7 @@ namespace WineAndFoodAPI.Controllers.User
             return "value";
         }
 
-        [HttpPost]
+        [HttpPost("/register")]
         public async Task<IActionResult> CreateUser([FromBody] UserCreateDto userForCreate)
         {
             if (!ModelState.IsValid)
@@ -39,7 +39,7 @@ namespace WineAndFoodAPI.Controllers.User
             return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
         }
 
-        [HttpPost("login")]
+        [HttpPost("/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
@@ -49,6 +49,16 @@ namespace WineAndFoodAPI.Controllers.User
                 return Unauthorized("Invalid email or password.");
             return Ok(authResponse);
         }
+
+        //[HttpPost("seed-admin")]
+        //public async Task<IActionResult> CreateAdminSeed(
+        //[FromBody] CreateAdminRequest request,
+        //[FromHeader] string secretKey) // Recibimos el header aquí
+        //    {
+        //        // Le pasamos la clave al servicio. Si está mal, el servicio explotará con una excepción.
+        //        var result = await _service.CreateAdminForceAsync(request);
+        //        return Ok(result);
+        //    }
 
     }
 }

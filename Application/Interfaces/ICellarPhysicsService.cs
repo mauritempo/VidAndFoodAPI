@@ -11,10 +11,12 @@ namespace Application.Interfaces
 {
     public interface ICellarPhysicsService
     {
-        Task ConsumeFromCellar(Guid userId, ConsumeItemRequest request);
-        Task AddWineToCellar(Guid userId, AddWineToCellarRequest request);
-        Task<CellarPhysics> CreateCellar(Guid userId, CreateCellarRequest request);
+        Task ConsumeFromCellar(ConsumeItemRequest request);
+        Task AddWineToCellar(AddWineToCellarRequest request);
 
-        Task<List<CellarSummaryDto>> ListUserCellars(Guid userId);
+        Task<CellarPhysics> CreateCellar(CreateCellarRequest request);
+
+        Task<List<CellarSummaryDto>> ListUserCellars();
+
     }
 }

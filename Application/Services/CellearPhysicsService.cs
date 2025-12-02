@@ -1,8 +1,9 @@
-﻿using Application.Interfaces;
-using Application.Models.Request.Celllear; // Tus DTOs de Request
+﻿using Application.Models.Request.Celllear;
 using Application.Models.Response.Cellar;
 using Domain.Entities;
+using Domain.Entities.Enums;
 using Domain.Interfaces.Repositories;
+using Application.Interfaces; 
 
 namespace Application.Services
 {
@@ -11,19 +12,29 @@ namespace Application.Services
         private readonly ICellarRepository _cellarRepository;
         private readonly ICellarItemRepository _itemRepository;
         private readonly IWineUserService _wineUserService;
+        private readonly ICurrentUser _currentUser; 
 
         public CellarPhysicsService(
             ICellarRepository cellarRepository,
             ICellarItemRepository itemRepository,
-            IWineUserService wineUserService)
+            IWineUserService wineUserService,
+            ICurrentUser currentUser)
         {
             _cellarRepository = cellarRepository;
             _itemRepository = itemRepository;
             _wineUserService = wineUserService;
+            _currentUser = currentUser;
         }
 
-        public async Task ConsumeFromCellar(Guid userId, ConsumeItemRequest request)
+        public async Task ConsumeFromCellar(ConsumeItemRequest request)
         {
+            var userId = _currentUser.UserId;
+            var userRole = _currentUser.Role;
+
+            if (userRole != Role.Sommelier)
+            {
+                throw new UnauthorizedAccessException("Solo los Sommeliers pueden gestionar el stock.");
+            }
             var item = await _itemRepository.GetItemAsync(request.CellarId, request.WineId);
 
             if (item == null) throw new KeyNotFoundException("Vino no encontrado en esta cava");
@@ -35,37 +46,51 @@ namespace Application.Services
 
             if (item.Quantity <= 0)
             {
-                // Si el stock llega a 0, borramos el registro.
                 await _itemRepository.DeleteAsync(item);
             }
             else
             {
-                // Si sobra stock, actualizamos.
                 await _itemRepository.UpdateAsync(item);
             }
 
             if (request.RegisterHistory)
             {
-                await _wineUserService.RegisterConsumption(userId, request.WineId, request.Notes ?? "");
+                await _wineUserService.RegisterConsumption(request.WineId, request.Notes ?? "");
             }
         }
-        public async Task AddWineToCellar(Guid userId, AddWineToCellarRequest request)
+
+        public async Task AddWineToCellar(AddWineToCellarRequest request)
         {
-            // A. Verificar si ya existe en esa cava
+            var userId = _currentUser.UserId;
+            var userRole = _currentUser.Role;
+
+            if (userRole != Role.Sommelier)
+            {
+                throw new UnauthorizedAccessException("Solo los Sommeliers pueden agregar vinos.");
+            }
+
+            var (items, _) = await _itemRepository.GetInventoryAsync(request.CellarId, 1, 1000);
+
+            var cellar = await _cellarRepository.GetByIdAsync(request.CellarId);
+            if (cellar == null) throw new KeyNotFoundException("Cava no encontrada");
+
+            int currentCount = items.Sum(i => i.Quantity);
+
+            if (cellar.Capacity.HasValue && (currentCount + request.Quantity) > cellar.Capacity.Value)
+            {
+                throw new InvalidOperationException($"No hay espacio suficiente. Capacidad: {cellar.Capacity}, Ocupado: {currentCount}, Intentas agregar: {request.Quantity}.");
+            }
+
             var existingItem = await _itemRepository.GetItemAsync(request.CellarId, request.WineId);
 
             if (existingItem != null)
             {
-                // CASO 1: Ya existe -> Sumamos cantidad
                 existingItem.Quantity += request.Quantity;
                 existingItem.DateAdded = DateTime.UtcNow;
-
-                // Persistir Update
                 await _itemRepository.UpdateAsync(existingItem);
             }
             else
             {
-                // CASO 2: No existe -> Creamos nuevo ítem
                 var newItem = new WineUserCellarItem
                 {
                     CellarPhysicsId = request.CellarId,
@@ -74,47 +99,43 @@ namespace Application.Services
                     DateAdded = DateTime.UtcNow,
                     PurchasePrice = request.PurchasePrice
                 };
-
-                // Persistir Insert
                 await _itemRepository.AddAsync(newItem);
-            }
-            var cellar = await _cellarRepository.GetByIdAsync(request.CellarId); // Necesitarías este método o usar el que ya tenés
-
-            // 2. Calcular ocupación actual
-            int currentCount = cellar.Items.Sum(i => i.Quantity);
-
-            // 3. Validar si explota la capacidad (Solo si Capacity tiene valor)
-            if (cellar.Capacity.HasValue && (currentCount + request.Quantity) > cellar.Capacity.Value)
-            {
-                throw new InvalidOperationException($"No hay espacio suficiente. Capacidad: {cellar.Capacity}, Ocupado: {currentCount}.");
             }
         }
 
-        public async Task<CellarPhysics> CreateCellar(Guid userId, CreateCellarRequest request)
+        public async Task<CellarPhysics> CreateCellar(CreateCellarRequest request)
         {
+            var userId = _currentUser.UserId;
+            var userRole = _currentUser.Role;
+            if (userRole != Role.Sommelier)
+            {
+                throw new UnauthorizedAccessException("Solo los Sommeliers pueden crear cavas.");
+            }
             var newCellar = new CellarPhysics
             {
                 UserId = userId,
                 Name = request.Name,
-                // Mapear otros campos si existen
+                Capacity = request.Capacity 
             };
 
-            // Usamos el repo de Cavas
             return await _cellarRepository.AddAsync(newCellar);
         }
 
-        public async Task<List<CellarSummaryDto>> ListUserCellars(Guid userId)
+        public async Task<List<CellarSummaryDto>> ListUserCellars()
         {
-            // Usamos el método específico del repo de Cavas que incluye los Items
+            var userId = _currentUser.UserId;
+            var userRole = _currentUser.Role;
+            if (userRole != Role.Sommelier)
+            {
+                throw new UnauthorizedAccessException("Función exclusiva para Sommeliers.");
+            }
             var cellars = await _cellarRepository.GetUserCellarsAsync(userId);
-
-            // Mapeo a DTO con resumen de cantidad
             return cellars.Select(c => new CellarSummaryDto
             {
                 Id = c.UuId,
                 Name = c.Name,
-                // Sumamos la cantidad de botellas de cada item para el resumen
-                TotalBottles = c.Items?.Sum(i => i.Quantity) ?? 0
+                TotalBottles = c.Items?.Sum(i => i.Quantity) ?? 0,
+                Capacity = c.Capacity
             }).ToList();
         }
     }
