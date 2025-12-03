@@ -39,7 +39,7 @@ namespace Application.Services
         }
 
 
-        public async Task RegisterConsumption(Guid wineId, string notes)
+        public async Task RegisterConsumption(Guid wineId)
         {
             var userId = _currentUser.UserId;
             var history = await _wineUserRepository.GetHistoryItemAsync(userId, wineId);
@@ -49,11 +49,6 @@ namespace Application.Services
                 history.TimesConsumed++; // Incrementamos contador
                 history.LastConsumedAt = DateTime.UtcNow;
 
-                if (!string.IsNullOrWhiteSpace(notes))
-                {
-                    history.TastingNotes = notes;
-                }
-
                 await _wineUserRepository.UpdateAsync(history);
             }
             else
@@ -62,7 +57,7 @@ namespace Application.Services
                 {
                     var count = await _wineUserRepository.GetCountByUserAsync(userId);
 
-                    if (count >= 30)
+                    if (count >= 5)
                     {
                         throw new InvalidOperationException("Has alcanzado el límite de 30 vinos para cuentas gratuitas. Actualiza tu suscripción a Sommelier para guardar ilimitados.");
                     }
@@ -73,7 +68,6 @@ namespace Application.Services
                     WineId = wineId,
                     TimesConsumed = 1,
                     LastConsumedAt = DateTime.UtcNow,
-                    TastingNotes = notes,
                 };
                 await _wineUserRepository.AddAsync(newHistory);
             }

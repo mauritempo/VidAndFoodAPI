@@ -59,11 +59,11 @@ namespace WineAndFoodAPI.Controllers.WineUser
         }
 
         [HttpPost("{wineId}/history")]
-        public async Task<IActionResult> RegisterConsumption(Guid wineId, [FromBody] RegisterConsumptionRequest request)
+        public async Task<IActionResult> RegisterConsumption(Guid wineId)
         {
             try
             {
-                await _wineUserService.RegisterConsumption(wineId, request.Notes ?? string.Empty);
+                await _wineUserService.RegisterConsumption(wineId);
                 return Ok(new { message = "Consumo registrado correctamente." });
             }
             catch (UnauthorizedAccessException ex)
