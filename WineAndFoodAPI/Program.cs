@@ -146,6 +146,19 @@ builder.Services.AddScoped<ICellarRepository, CellarRepository>();
 
 ;
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        name: "AllowOrigin",
+        policyBuilder =>
+        {
+            policyBuilder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+        });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -155,6 +168,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowOrigin");
 
 app.UseAuthentication();
 app.UseAuthorization();
