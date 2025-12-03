@@ -23,32 +23,30 @@ namespace Application.Services
 
 
 
-        public async Task<PagedResult<WineListItemDto>> GetHistoryList( int page, int pageSize)
+        public async Task<List<WineListItemDto>> GetHistoryList()
         {
             var userId = _currentUser.UserId;
-            var (historyItems, totalCount) = await _wineUserRepository.GetPagedHistoryAsync(userId, page, pageSize);
+
+            // 1. Llamamos al repo sin parámetros de página
+            var historyItems = await _wineUserRepository.GetAllHistoryAsync(userId);
+
+            // 2. Mapeamos directamente a la lista de DTOs
             var dtos = historyItems
                 .Select(h => h.Wine.ToListItemDto())
                 .ToList();
-            return new PagedResult<WineListItemDto>(dtos, totalCount, page, pageSize);
+
+            return dtos;
         }
 
 
         public async Task RegisterConsumption(Guid wineId, string notes)
         {
-            if (_currentUser.Role == Role.User)
-            {
-                throw new UnauthorizedAccessException("Mejora tu cuenta para registrar tus catas.");
-
-            }
-
             var userId = _currentUser.UserId;
-
             var history = await _wineUserRepository.GetHistoryItemAsync(userId, wineId);
 
             if (history != null)
             {
-                history.TimesConsumed++;// Incrementamos contador [cite: 128]
+                history.TimesConsumed++; // Incrementamos contador
                 history.LastConsumedAt = DateTime.UtcNow;
 
                 if (!string.IsNullOrWhiteSpace(notes))
@@ -60,6 +58,15 @@ namespace Application.Services
             }
             else
             {
+                if (_currentUser.Role == Role.User)
+                {
+                    var count = await _wineUserRepository.GetCountByUserAsync(userId);
+
+                    if (count >= 30)
+                    {
+                        throw new InvalidOperationException("Has alcanzado el límite de 30 vinos para cuentas gratuitas. Actualiza tu suscripción a Sommelier para guardar ilimitados.");
+                    }
+                }
                 var newHistory = new WineUser
                 {
                     UserId = userId,
@@ -68,11 +75,13 @@ namespace Application.Services
                     LastConsumedAt = DateTime.UtcNow,
                     TastingNotes = notes,
                 };
-
                 await _wineUserRepository.AddAsync(newHistory);
             }
         }
-        public async Task<PagedResult<WineListItemDto>> ListFavoriteWines(int page, int pageSize)
+
+
+
+        public async Task<List<WineListItemDto>> ListFavoriteWines()
         {
             if (_currentUser.Role == Role.User)
             {
@@ -80,33 +89,31 @@ namespace Application.Services
             }
 
             var userId = _currentUser.UserId;
-            var (favorites, totalCount) = await _wineFavouriteRepository.GetPagedFavouriteAsync(userId, page, pageSize);
+            var favorites = await _wineFavouriteRepository.GetFavorites(userId);
             var dtos = favorites.Select(f => f.Wine.ToListItemDto()).ToList();
-
-            return new PagedResult<WineListItemDto>(dtos, totalCount, page, pageSize);
+            return dtos;
         }
 
         public async Task ToggleFavorite(Guid wineId)
         {
+            if (_currentUser.Role == Role.User)
+            {
+                throw new UnauthorizedAccessException("Esta funcionalidad es exclusiva para Sommeliers.");
+            }
             var userId = _currentUser.UserId;
-            var existingFav = await _wineFavouriteRepository.GetByPairAsync(userId, wineId);
-
+            var existingFav = await _wineFavouriteRepository.GetFavouritesByUser(userId, wineId);
             if (existingFav != null)
             {
-                // Si existe, BORRAMOS (Des-likear)
                 await _wineFavouriteRepository.DeleteAsync(existingFav);
             }
             else
             {
-                // Si no existe, CREAMOS (Likear)
                 var newFav = new WineFavorite
                 {
                     UserId = userId,
                     WineId = wineId,
                     CreatedAt = DateTime.UtcNow
                 };
-
-                // Usamos AddAsync del BaseRepository
                 await _wineFavouriteRepository.AddAsync(newFav);
             }
         }
@@ -129,5 +136,34 @@ namespace Application.Services
                 PersonalNotes = history?.TastingNotes,
             };
         }
+        public async Task RemoveFavorite(Guid wineId)
+        {
+            var userId = _currentUser.UserId;
+
+            var existingFav = await _wineFavouriteRepository.GetFavouritesByUser(userId, wineId);
+
+            if (existingFav != null)
+            {
+                await _wineFavouriteRepository.DeleteAsync(existingFav);
+            }
+        }
+
+
+        public async Task RemoveFromHistory(Guid wineId)
+        {
+            var userId = _currentUser.UserId;
+
+            var historyItem = await _wineUserRepository.GetHistoryItemAsync(userId, wineId);
+
+            if (historyItem != null)
+            {
+                await _wineUserRepository.DeleteAsync(historyItem);
+            }
+            else
+            {
+                throw new KeyNotFoundException("El vino no se encuentra en tu historial.");
+            }
+        }
+
     }
-    }
+}

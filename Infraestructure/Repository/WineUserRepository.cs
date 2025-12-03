@@ -24,35 +24,32 @@ namespace Infrastructure.Repository
                         // No usamos AsNoTracking porque queremos modificarlo y guardar cambios (Update)
                         .FirstOrDefaultAsync(h => h.UserId == userId && h.WineId == wineId);
          }
-        // En Infrastructure/Repository/WineUserRepository.cs
 
-        public async Task<(List<WineUser> Items, int TotalCount)> GetPagedHistoryAsync(Guid userId, int page, int pageSize)
+
+
+        public async Task<List<WineUser>> GetAllHistoryAsync(Guid userId)
         {
-            var query = _context.Set<WineUser>()
+            return await _context.Set<WineUser>()
                 .AsNoTracking()
                 .Where(h => h.UserId == userId)
-                .Include(h => h.Wine)                // Traer el Vino
-                    .ThenInclude(w => w.WineGrapeVarieties) // Traer relación intermedia
-                        .ThenInclude(wg => wg.Grape)        // Traer nombre de la Uva
-                                                            // Ordenamos por fecha de consumo (el más reciente arriba)
-                                                            // Si LastConsumedAt es nulo, usa CreatedAt (seguridad)
-                .OrderByDescending(h => h.LastConsumedAt ?? h.CreatedAt);
-
-            // 1. Contar total de registros
-            var totalCount = await query.CountAsync();
-
-            // 2. Aplicar paginación
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .Include(h => h.Wine) 
+                    .ThenInclude(w => w.WineGrapeVarieties) 
+                        .ThenInclude(wg => wg.Grape)
+                .OrderByDescending(h => h.LastConsumedAt ?? h.CreatedAt) 
                 .ToListAsync();
-
-            return (items, totalCount);
+        }
+        public async Task<int> GetCountByUserAsync(Guid userId)
+        {
+            return await _context.Set<WineUser>()
+                .Where(x => x.UserId == userId)
+                .CountAsync();
         }
 
-
-
-
+        public async Task DeleteAsync(WineUser wineUser)
+        {
+            _context.Set<WineUser>().Remove(wineUser);
+            await _context.SaveChangesAsync();
+        }
 
 
 
