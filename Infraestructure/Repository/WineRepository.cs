@@ -134,6 +134,17 @@ namespace Infrastructure.Repository
                 .FirstOrDefaultAsync(w => w.UuId == uuid);
         }
 
-        
+        public async Task<List<string>> GetUniqueWineriesAsync()
+        {
+            return await _context.Set<Wine>()
+                .AsNoTracking() 
+                .Where(w => w.IsActive && !string.IsNullOrEmpty(w.WineryName))
+                .Select(w => w.WineryName) 
+                .Distinct() 
+                .OrderBy(name => name) 
+                .ToListAsync();
+        }
+
+
     }
 }

@@ -18,55 +18,56 @@ namespace Application.Services
             private readonly IWineRepository _wineRepository;
             private readonly ICurrentUser _currentUser;
 
-        public RatingService(IRatingRepository ratingRepository, IWineRepository wineRepository, ICurrentUser currentUser)
-            {
-                _ratingRepository = ratingRepository;
-                _wineRepository = wineRepository;
-                _currentUser = currentUser;
-        }
-
-        public async Task RateWineAsync(RateWineRequest request)
-        {
-            var userId = _currentUser.UserId;
-            var userRole = _currentUser.Role;
-
-            if (request.Score < 1 || request.Score > 5)
-                throw new ArgumentException("El puntaje debe estar entre 1 y 5.");
-            bool isRatingPublic = (userRole == Role.Sommelier);
-
-            var existingRating = await _ratingRepository.GetByUserAndWineAsync(userId, request.WineId);
-
-            if (existingRating != null)
-            {
-                existingRating.Score = request.Score;
-                existingRating.Review = request.Review;
-                existingRating.CreatedAt = DateTime.UtcNow;
-                existingRating.IsPublic = isRatingPublic;
-
-                await _ratingRepository.UpdateAsync(existingRating);
-            }
-            else
-            {
-                var newRating = new Rating
+            public RatingService(IRatingRepository ratingRepository, IWineRepository wineRepository, ICurrentUser currentUser)
                 {
-                    UserId = userId,
-                    WineId = request.WineId,
-                    Score = request.Score,
-                    Review = request.Review,
-                    CreatedAt = DateTime.UtcNow,
-
-                    IsPublic = isRatingPublic
-                };
-
-                await _ratingRepository.AddAsync(newRating);
+                    _ratingRepository = ratingRepository;
+                    _wineRepository = wineRepository;
+                    _currentUser = currentUser;
             }
-            if (isRatingPublic)
+
+            public async Task RateWineAsync(RateWineRequest request)
             {
-                await UpdateWineStatistics(request.WineId);
-            }
-        }
+                var userId = _currentUser.UserId;
+                var userRole = _currentUser.Role;
 
-        private async Task UpdateWineStatistics(Guid wineId)
+                if (request.Score < 1 || request.Score > 5)
+                    throw new ArgumentException("El puntaje debe estar entre 1 y 5.");
+
+                bool isRatingPublic = (userRole == Role.Sommelier);
+
+                var existingRating = await _ratingRepository.GetByUserAndWineAsync(userId, request.WineId);
+
+                if (existingRating != null)
+                {
+                    existingRating.Score = request.Score;
+                    existingRating.Review = request.Review;
+                    existingRating.CreatedAt = DateTime.UtcNow;
+                    existingRating.IsPublic = isRatingPublic;
+
+                    await _ratingRepository.UpdateAsync(existingRating);
+                }
+                else
+                {
+                    var newRating = new Rating
+                    {
+                        UserId = userId,
+                        WineId = request.WineId,
+                        Score = request.Score,
+                        Review = request.Review,
+                        CreatedAt = DateTime.UtcNow,
+
+                        IsPublic = isRatingPublic
+                    };
+
+                    await _ratingRepository.AddAsync(newRating);
+                }
+                if (isRatingPublic)
+                {
+                    await UpdateWineStatistics(request.WineId);
+                }
+            }
+
+            private async Task UpdateWineStatistics(Guid wineId)
             {
                 var (newAverage, newCount) = await _ratingRepository.GetWineStatsAsync(wineId);
 
@@ -80,9 +81,9 @@ namespace Application.Services
                 }
             }
 
-            public async Task<List<WineReviewDto>> GetWineReviews(Guid wineId, int page = 1)
+            public async Task<List<WineReviewDto>> GetWineReviews(Guid wineId)
             {
-                var reviews = await _ratingRepository.GetReviewsByWineAsync(wineId, page, 10);
+                var reviews = await _ratingRepository.GetReviewsByWineAsync(wineId);
 
 
                 return reviews.Select(r => new WineReviewDto
@@ -95,10 +96,10 @@ namespace Application.Services
                 }).ToList();
             }
 
-        Task IRatingService.UpdateWineStatistics(Guid wineId)
-        {
-            return UpdateWineStatistics(wineId);
-        }
+            Task IRatingService.UpdateWineStatistics(Guid wineId)
+            {
+                return UpdateWineStatistics(wineId);
+            }
     }
     }
 

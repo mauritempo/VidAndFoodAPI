@@ -13,7 +13,6 @@ namespace Domain.Interfaces.Repositories
 
         Task<(double Average, int Count)> GetWineStatsAsync(Guid wineId);
 
-        Task<List<Rating>> GetReviewsByWineAsync(Guid wineId, int page, int pageSize);
-
+        Task<List<Rating>> GetReviewsByWineAsync(Guid wineId);
     }
 }

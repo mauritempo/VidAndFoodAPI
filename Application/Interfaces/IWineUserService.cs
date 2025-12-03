@@ -11,11 +11,12 @@ namespace Application.Interfaces
 {
     public interface IWineUserService
     {
-        Task<PagedResult<WineListItemDto>> GetHistoryList(int page, int pageSize);
+        Task<List<WineListItemDto>> GetHistoryList();
         Task RegisterConsumption(Guid wineId, string notes);
-        Task<PagedResult<WineListItemDto>> ListFavoriteWines(int page, int pageSize);
+        Task<List<WineListItemDto>> ListFavoriteWines();
         Task ToggleFavorite(Guid wineId);
         Task<UserWineStatusDto> GetUserWineStatus(Guid wineId);
-
+        Task RemoveFavorite(Guid wineId);
+        Task RemoveFromHistory(Guid wineId);
     }
 }

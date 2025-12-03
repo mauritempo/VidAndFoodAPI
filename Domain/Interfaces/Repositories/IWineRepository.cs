@@ -18,5 +18,7 @@ namespace Domain.Interfaces.Repositories
 
         Task<Wine?> GetWithDetailsAsync(Guid uuid);
 
+        Task<List<string>> GetUniqueWineriesAsync();
+
     }
 }

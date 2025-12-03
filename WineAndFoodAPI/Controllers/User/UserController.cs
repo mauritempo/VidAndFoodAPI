@@ -28,7 +28,7 @@ namespace WineAndFoodAPI.Controllers.User
             return "value";
         }
 
-        [HttpPost("/register")]
+        [HttpPost("register")]
         public async Task<IActionResult> CreateUser([FromBody] UserCreateDto userForCreate)
         {
             if (!ModelState.IsValid)
@@ -39,7 +39,7 @@ namespace WineAndFoodAPI.Controllers.User
             return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
         }
 
-        [HttpPost("/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)

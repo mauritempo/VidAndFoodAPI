@@ -58,18 +58,13 @@ namespace Application.Services
                 Email = email,
                 FullName = dto.FullName,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                RoleUser = Role.User,
             };
 
             // Hashear Password
             user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
-            // Asignar Rol (con seguridad)
-            var callerRole = _current.Role;
-            if (dto.Role.HasValue && dto.Role.Value != Role.User && callerRole != Role.Admin)
-                throw new UnauthorizedAccessException("Solo un Admin puede asignar roles elevados.");
-
-            user.RoleUser = dto.Role ?? Role.User;
 
             var addedUser = await _userRepository.AddAsync(user);
 

@@ -15,26 +15,21 @@ namespace Infrastructure.Repository
         public WineFavouriteRepository(WineDBContext context) : base(context)
         {
         }
-        public async Task<(List<WineFavorite> Items, int TotalCount)> GetPagedFavouriteAsync(Guid userId, int page, int pageSize)
+        public async Task<List<WineFavorite>> GetFavorites(Guid userId)
         {
             var query = _context.Set<WineFavorite>()
                 .AsNoTracking()
                 .Where(f => f.UserId == userId)
-                .Include(f => f.Wine)                
-                    .ThenInclude(w => w.WineGrapeVarieties) 
-                        .ThenInclude(wg => wg.Grape)  
+                .Include(f => f.Wine)
+                    .ThenInclude(w => w.WineGrapeVarieties)
+                        .ThenInclude(wg => wg.Grape)
                 .OrderByDescending(f => f.CreatedAt);
 
-            var totalCount = await query.CountAsync();
-
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return (items, totalCount);
+            // CORRECCIÓN: Debes ejecutar la query con ToListAsync()
+            return await query.ToListAsync();
         }
-        public async Task<WineFavorite?> GetByPairAsync(Guid userId, Guid wineId)
+
+        public async Task<WineFavorite?> GetFavouritesByUser(Guid userId, Guid wineId)
         {
             return await _context.Set<WineFavorite>()
                 .FirstOrDefaultAsync(f => f.UserId == userId && f.WineId == wineId);

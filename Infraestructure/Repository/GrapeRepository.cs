@@ -14,5 +14,7 @@ namespace Infrastructure.Repository
         public GrapeRepository(WineDBContext context) : base(context) 
         {
         }
+
+        
     }
 }

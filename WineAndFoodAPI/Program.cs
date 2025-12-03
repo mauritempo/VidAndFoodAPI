@@ -11,7 +11,6 @@ using Infrastructure.Services;
 using Infrastructure.Services.Resilience;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -23,9 +22,9 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 #region Database
-builder.Services.AddDbContext<WineDBContext>(dbContextOptions =>
-    dbContextOptions.UseSqlite(builder.Configuration["ConnectionStrings:WineAndFoodDBConnectionString"]));
+string connectionString = builder.Configuration.GetConnectionString("WineAndFoodDBConnectionString");
 
+builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure")));
 #endregion
 
 
@@ -145,6 +144,18 @@ builder.Services.AddScoped<ICellarRepository, CellarRepository>();
 #endregion
 
 ;
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        name: "AllowOrigin",
+        policyBuilder =>
+        {
+            policyBuilder.AllowAnyOrigin()
+                         .AllowAnyMethod()
+                         .AllowAnyHeader();
+        });
+});
 
 var app = builder.Build();
 
