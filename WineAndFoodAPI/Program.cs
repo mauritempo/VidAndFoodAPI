@@ -116,6 +116,7 @@ builder.Services.AddScoped<ICellarPhysicsService, CellarPhysicsService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IWineUserService, WineUserService>();
 builder.Services.AddScoped<IAuthentication, AuthService>();
+builder.Services.AddScoped<IGrapeService, GrapeService>();
 
 #endregion
 
