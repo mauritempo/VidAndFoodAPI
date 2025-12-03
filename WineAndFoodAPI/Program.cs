@@ -151,9 +151,10 @@ builder.Services.AddCors(options =>
         name: "AllowOrigin",
         policyBuilder =>
         {
-            policyBuilder.AllowAnyOrigin()
-                         .AllowAnyMethod()
-                         .AllowAnyHeader();
+            policyBuilder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
         });
 });
 
@@ -166,6 +167,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowOrigin");
 
 app.UseAuthentication();
 app.UseAuthorization();
