@@ -55,7 +55,7 @@ namespace Application.Services
 
             if (request.RegisterHistory)
             {
-                await _wineUserService.RegisterConsumption(request.WineId, request.Notes ?? "");
+                await _wineUserService.RegisterConsumption(request.WineId);
             }
         }
 
