@@ -31,7 +31,7 @@ namespace Application.Services
             var userRole = _currentUser.Role;
             if (userRole != Role.Admin)
             {
-                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden Crear.);
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden Crear.");
             }
             var wine = request.ToEntity();
 
@@ -190,6 +190,14 @@ namespace Application.Services
                     GrapeId = grapeId
                 });
             }
+        }
+
+        public async Task<List<WineListItemDto>> GetAllWines()
+        {
+            var wines = await _wineRepository.GetAll();
+
+            // Mapeamos a DTO
+            return wines.Select(w => w.ToListItemDto()).ToList();
         }
     }
 }

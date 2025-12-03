@@ -97,6 +97,5 @@ namespace Application.Services
             return DateTime.UtcNow.AddHours(1);
         }
 
-        public 
     }
 }

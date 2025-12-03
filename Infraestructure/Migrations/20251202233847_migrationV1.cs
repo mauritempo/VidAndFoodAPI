@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class migrationV3 : Migration
+    public partial class migrationV1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,11 +15,11 @@ namespace Infrastructure.Migrations
                 name: "Grapes",
                 columns: table => new
                 {
-                    UuId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 120, nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    UuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -30,14 +30,14 @@ namespace Infrastructure.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UuId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
-                    FullName = table.Column<string>(type: "TEXT", nullable: true),
-                    RoleUser = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    UuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    PasswordHash = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    FullName = table.Column<string>(type: "text", nullable: true),
+                    RoleUser = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -48,22 +48,22 @@ namespace Infrastructure.Migrations
                 name: "Wines",
                 columns: table => new
                 {
-                    UuId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 160, nullable: false),
-                    WineryName = table.Column<string>(type: "TEXT", maxLength: 160, nullable: false),
-                    RegionName = table.Column<string>(type: "TEXT", maxLength: 160, nullable: false),
-                    CountryName = table.Column<string>(type: "TEXT", maxLength: 160, nullable: false),
-                    WineType = table.Column<string>(type: "TEXT", maxLength: 24, nullable: false),
-                    VintageYear = table.Column<int>(type: "INTEGER", nullable: false),
-                    LabelImageUrl = table.Column<string>(type: "TEXT", maxLength: 512, nullable: true),
-                    TastingNotes = table.Column<string>(type: "TEXT", maxLength: 2048, nullable: true),
-                    Price = table.Column<decimal>(type: "TEXT", nullable: false),
-                    AverageScore = table.Column<double>(type: "REAL", nullable: false),
-                    RatingCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    Aroma = table.Column<string>(type: "TEXT", maxLength: 1024, nullable: true),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    UuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    WineryName = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    RegionName = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    CountryName = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    WineType = table.Column<string>(type: "character varying(24)", maxLength: 24, nullable: false),
+                    VintageYear = table.Column<int>(type: "integer", nullable: false),
+                    LabelImageUrl = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
+                    TastingNotes = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    AverageScore = table.Column<double>(type: "double precision", nullable: false),
+                    RatingCount = table.Column<int>(type: "integer", nullable: false),
+                    Aroma = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,13 +74,13 @@ namespace Infrastructure.Migrations
                 name: "CellarPhysics",
                 columns: table => new
                 {
-                    UuId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Capacity = table.Column<int>(type: "INTEGER", nullable: true),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    UuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Capacity = table.Column<int>(type: "integer", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -97,22 +97,22 @@ namespace Infrastructure.Migrations
                 name: "Ratings",
                 columns: table => new
                 {
-                    UuId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    WineId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Score = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsPublic = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: true),
-                    Review = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    UserUuId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    WineUuId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    UuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    WineId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Score = table.Column<int>(type: "integer", nullable: false),
+                    IsPublic = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    Review = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UserUuId = table.Column<Guid>(type: "uuid", nullable: true),
+                    WineUuId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Ratings", x => x.UuId);
-                    table.CheckConstraint("CK_Rating_Score", "[Score] >= 1 AND [Score] <= 5");
+                    table.CheckConstraint("CK_Rating_Score", "\"Score\" >= 1 AND \"Score\" <= 5");
                     table.ForeignKey(
                         name: "FK_Ratings_Users_UserId",
                         column: x => x.UserId,
@@ -141,12 +141,12 @@ namespace Infrastructure.Migrations
                 name: "WineFavorites",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    WineId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UuId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    WineId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -169,14 +169,14 @@ namespace Infrastructure.Migrations
                 name: "WineGrapeVarieties",
                 columns: table => new
                 {
-                    GrapeId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    WineId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Percentage = table.Column<int>(type: "INTEGER", nullable: true)
+                    GrapeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    WineId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Percentage = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_WineGrapeVarieties", x => new { x.WineId, x.GrapeId });
-                    table.CheckConstraint("CK_WineGrapeVariety_Percentage", "([Percentage] IS NULL) OR ([Percentage] >= 0 AND [Percentage] <= 100)");
+                    table.CheckConstraint("CK_WineGrapeVariety_Percentage", "(\"Percentage\" IS NULL) OR (\"Percentage\" >= 0 AND \"Percentage\" <= 100)");
                     table.ForeignKey(
                         name: "FK_WineGrapeVarieties_Grapes_GrapeId",
                         column: x => x.GrapeId,
@@ -195,15 +195,15 @@ namespace Infrastructure.Migrations
                 name: "WineUsers",
                 columns: table => new
                 {
-                    UuId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    WineId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    TastingNotes = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
-                    TimesConsumed = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 1),
-                    LastConsumedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    UuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    WineId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TastingNotes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    TimesConsumed = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                    LastConsumedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -226,21 +226,21 @@ namespace Infrastructure.Migrations
                 name: "WineUserCellarItems",
                 columns: table => new
                 {
-                    UuId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CellarPhysicsId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    WineId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Quantity = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 1),
-                    LocationNote = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
-                    PurchasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    DateAdded = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    UuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CellarPhysicsId = table.Column<Guid>(type: "uuid", nullable: false),
+                    WineId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                    LocationNote = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    PurchasePrice = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    DateAdded = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_WineUserCellarItems", x => x.UuId);
-                    table.CheckConstraint("CK_CellarItem_Quantity", "[Quantity] > 0");
+                    table.CheckConstraint("CK_CellarItem_Quantity", "\"Quantity\" > 0");
                     table.ForeignKey(
                         name: "FK_WineUserCellarItems_CellarPhysics_CellarPhysicsId",
                         column: x => x.CellarPhysicsId,
