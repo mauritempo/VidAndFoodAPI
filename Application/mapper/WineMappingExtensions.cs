@@ -1,4 +1,5 @@
 ﻿using Application.Models.Request.Wines;
+using Application.Models.Response;
 using Application.Models.Response.Wines;
 using Domain.Entities;
 using Domain.Model.Shared;
@@ -46,12 +47,13 @@ namespace Application.mapper
                 AverageScore = entity.AverageScore,
                 IsActive = entity.IsActive,
                 // Mapeo de la lista de uvas
-                Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeDto
+                Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
                 {
                     Id = g.GrapeId,
                     Name = g.Grape?.Name ?? "Sin nombre"
-                }).ToList() ?? new List<GrapeDto>()
+                }).ToList() ?? new List<GrapeResponseDto>() 
             };
+
         }
 
         // 3. De Entidad a RESPONSE (Lista Admin)

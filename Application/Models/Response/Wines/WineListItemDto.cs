@@ -16,6 +16,7 @@ namespace Application.Models.Response.Wines
         public int VintageYear { get; set; }
         public string? ImageUrl { get; set; }
         public double AverageScore { get; set; }
-        public string GrapeNames { get; set; } = string.Empty; // Texto plano para la lista
+        public string GrapeNames { get; set; } = string.Empty; //ver si retornar grapedto para dsp busquedas
+
     }
 }

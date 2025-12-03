@@ -15,6 +15,8 @@ namespace Application.Interfaces
         Task<WineDetailDto> UpdateWine(Guid id, UpdateWineRequest request);
         Task<List<WineListItemDto>> GetAllWines();
         Task SoftDeleteWine(Guid id);
+        Task<List<string>> GetAllWineries();
+        Task<WineDetailDto> GetWineById(Guid id);
 
     }
 }

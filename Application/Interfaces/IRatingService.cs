@@ -12,8 +12,7 @@ namespace Application.Interfaces
     {
         Task RateWineAsync(RateWineRequest request);
         Task UpdateWineStatistics(Guid wineId);
-
-        Task<List<WineReviewDto>> GetWineReviews(Guid wineId, int page = 1);
+        Task<List<WineReviewDto>> GetWineReviews(Guid wineId);
 
     }
 }

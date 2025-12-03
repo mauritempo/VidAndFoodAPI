@@ -15,11 +15,13 @@ namespace Application.Services
     {
         private readonly IWineRepository _wineRepository;
         private readonly ICurrentUser _currentUser;
+       
 
         public WineService(IWineRepository wineRepository, ICurrentUser currentUser)
         {
             _wineRepository = wineRepository;
             _currentUser = currentUser;
+            
         }
 
         // ==========================================================
@@ -198,6 +200,13 @@ namespace Application.Services
 
             // Mapeamos a DTO
             return wines.Select(w => w.ToListItemDto()).ToList();
+        }
+
+        public async Task<List<string>> GetAllWineries()
+        {
+            // Aquí podrías agregar caché si la lista es muy grande, 
+            // pero por ahora llamada directa es suficiente.
+            return await _wineRepository.GetUniqueWineriesAsync();
         }
     }
 }

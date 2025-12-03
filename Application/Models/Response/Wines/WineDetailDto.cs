@@ -13,6 +13,6 @@ namespace Application.Models.Response.Wines
         public bool IsActive { get; set; }
 
         // Necesitamos una lista de objetos para mostrar las uvas en el detalle
-        public List<GrapeDto> Grapes { get; set; } = new();
+        public List<GrapeResponseDto> Grapes { get; set; } = new();
     }
 }

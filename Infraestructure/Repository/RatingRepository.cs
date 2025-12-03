@@ -35,16 +35,16 @@ namespace Infrastructure.Repository
             return (average, count);
         }
 
-        public async Task<List<Rating>> GetReviewsByWineAsync(Guid wineId, int page, int pageSize)
+        public async Task<List<Rating>> GetReviewsByWineAsync(Guid wineId) 
         {
             return await _context.Set<Rating>()
                 .AsNoTracking()
-                .Where(r => r.WineId == wineId && !string.IsNullOrEmpty(r.Review)) // Solo traer los que tienen texto
+                .Where(r => r.WineId == wineId && !string.IsNullOrEmpty(r.Review))
                 .Where(r => r.IsPublic == true)
-                .Include(r => r.User) // Incluir usuario para mostrar el nombre
+                .Include(r => r.User)
                 .OrderByDescending(r => r.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                // .Skip(...)  <-- ELIMINADO
+                // .Take(...)  <-- ELIMINADO
                 .ToListAsync();
         }
     }

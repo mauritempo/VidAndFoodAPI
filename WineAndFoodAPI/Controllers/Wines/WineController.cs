@@ -11,10 +11,13 @@ namespace WineAndFoodAPI.Controllers.Wines
     public class WineController : ControllerBase
     {
         private readonly IWineService _wineService;
+        private readonly IRatingService _ratingService;
 
-        public WineController(IWineService wineService)
+
+        public WineController(IWineService wineService, IRatingService ratingService)
         {
             _wineService = wineService;
+            _ratingService = ratingService;
         }
 
         [HttpGet("all-wines")] 
@@ -23,6 +26,35 @@ namespace WineAndFoodAPI.Controllers.Wines
             var wines = await _wineService.GetAllWines();
 
             return Ok(wines);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<WineByIdResponseDto>> GetWineById(Guid id)
+        {
+            try
+            {
+                var wineDetail = await _wineService.GetWineById(id);
+                var ratingWine = await _ratingService.GetWineReviews(id);
+                var response = new WineByIdResponseDto
+                {
+                    Wine = wineDetail,
+                    Reviews = ratingWine
+                };
+
+                // 4. Retornamos el objeto completo
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("filters/wineries")] 
+        public async Task<ActionResult<IEnumerable<string>>> GetWineries()
+        {
+            var wineries = await _wineService.GetAllWineries();
+            return Ok(wineries);
         }
 
     }
