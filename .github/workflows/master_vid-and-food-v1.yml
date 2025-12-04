@@ -1,82 +1,42 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+deploy:
+  runs-on: windows-latest
+  needs: build
+  permissions:
+    id-token: write
+    contents: read
 
-name: Build and deploy ASP.Net Core app to Azure Web App - Vid-And-Food-V1
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-on:
-  push:
-    branches:
-      - master
-  workflow_dispatch:
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
 
-jobs:
-  build:
-    runs-on: windows-latest
-    permissions:
-      contents: read #This is required for actions/checkout
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: .net-app
+        path: ./publish   # carpeta donde quedan los archivos publicados
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F44805B1715F4E5D97FE9E7F3B7364F1 }}
+        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_03F80CC519784B4CB2A15B07332867FD }}
+        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C4EF33B00DD24A54A834C62DB7067ABE }}
 
-      - name: Set up .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.x'
+    - name: install dotnet-ef tool
+      run: dotnet tool install --global dotnet-ef --version 8.*
 
-      - name: Build application
-        # Build the project inside the WineAndFoodAPI folder
-        run: dotnet build WineAndFoodAPI/WineAndFoodAPI.csproj --configuration Release
+    - name: Update database with EF Core migrations
+      run: dotnet ef database update --project ./Infraestructure/Infraestructure.csproj --startup-project ./WineAndFoodAPI/WineAndFoodAPI.csproj
 
-      - name: dotnet publish
-        # Publish the same project into the myapp folder for deployment
-        run: dotnet publish WineAndFoodAPI/WineAndFoodAPI.csproj -c Release -o "./myapp"
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: .net-app
-          # Upload the contents of the publish folder so the downloaded artifact has the files at the artifact root
-          path: ./myapp/**
-
-  deploy:
-    runs-on: windows-latest
-    needs: build
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - name: Set up .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.x'
-
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: .net-app
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F44805B1715F4E5D97FE9E7F3B7364F1 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_03F80CC519784B4CB2A15B07332867FD }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C4EF33B00DD24A54A834C62DB7067ABE }}
-      - name: install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef --version 8.*
-
-      - name: Update database with EF Core migrations
-        run: dotnet ef database update --project ./Infraestructure/Infraestructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
-
-
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'Vid-And-Food-V1'
-          slot-name: 'Production'
-          # The download step extracts the artifact into a folder named after the artifact ('.net-app')
-          # Point the deploy action at that folder so it contains the published app files
-          package: .
-          
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'Vid-And-Food-V1'
+        slot-name: 'Production'
+        package: ./publish
