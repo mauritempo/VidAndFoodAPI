@@ -71,7 +71,7 @@ jobs:
         run: dotnet tool install --global dotnet-ef --version 8.*
 
       - name: Update database with EF Core migrations
-        run: dotnet ef database update --project ./Infraestructure/Infraestructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
+        run: dotnet ef database update --project ./back/Infraestructure/Infraestructure.csproj --startup-project ./back/WineAndFoodAPI/WineAndFoodAPI.csproj
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
