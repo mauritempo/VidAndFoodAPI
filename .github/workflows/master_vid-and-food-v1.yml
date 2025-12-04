@@ -76,8 +76,8 @@ jobs:
       # -----------------------------------------------------------------------------
 
       - name: Update database with EF Core migrations
-        # Usamos la ruta SIN 'back/', igual que en tu paso de Build
-        run: dotnet ef database update --project Infraestructure/Infraestructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
+        # Fíjate bien: La carpeta es 'Infraestructure' pero el archivo es 'Infrastructure.csproj'
+        run: dotnet ef database update --project Infraestructure/Infrastructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
