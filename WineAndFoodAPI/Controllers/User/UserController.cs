@@ -22,7 +22,7 @@ namespace WineAndFoodAPI.Controllers.User
             _authService = authentication;
         }
 
-        [HttpPost("upgrade-to-sommelier")] // POST: api/users/upgrade-to-sommelier
+        [HttpPut("upgrade-to-sommelier")] // POST: api/users/upgrade-to-sommelier
         public async Task<IActionResult> UpgradeToSommelier()
         {
             try
