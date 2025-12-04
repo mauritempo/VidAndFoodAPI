@@ -46,6 +46,11 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -57,6 +62,12 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F44805B1715F4E5D97FE9E7F3B7364F1 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_03F80CC519784B4CB2A15B07332867FD }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C4EF33B00DD24A54A834C62DB7067ABE }}
+      - name: install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef --version 8.*
+
+      - name: Update database with EF Core migrations
+        run: dotnet ef database update --project Infraestructure/Infraestructure.csproj --startup-project WineAndFoodAPI.csproj
+
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
