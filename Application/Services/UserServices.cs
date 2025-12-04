@@ -41,7 +41,7 @@ namespace Application.Services
             {
                 Id = u.UuId,
                 Email = u.Email,
-                FullName = u.Email, // O u.Name + " " + u.LastName si lo tienes
+                FullName = u.FullName, // O u.Name + " " + u.LastName si lo tienes
                 Role = u.RoleUser.ToString(),
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt
