@@ -10,13 +10,13 @@ namespace Domain.Entities
 {
     public class WineGrapeVariety
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int GrapeId { get; set; }
-        public int WineId { get; set; }
-        public Wine Wine { get; set; } = null!;
+        public Guid GrapeId { get; set; }
+        public Guid WineId { get; set; }
+        public Wine Wine { get; set; } 
         
-        public Grape Grape { get; set; } = null!;
+        public Grape Grape { get; set; }
          
         public int? Percentage { get; set; }
+
     }
 }

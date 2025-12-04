@@ -1,24 +1,30 @@
 using Application.Interfaces;
-using Domain.Interfaces;
+using Application.Options;
+using Application.Services;
+using Domain.Entities;
+using Domain.Interfaces.Repositories;
 using Infrastructure;
 using Infrastructure.Options;
 using Infrastructure.Repository;
+using Infrastructure.Security;
 using Infrastructure.Services;
-using Microsoft.Data.Sqlite;
+using Infrastructure.Services.Resilience;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Database
-string connectionString = builder.Configuration["ConnectionStrings:WineAndFoodDBConnectionString"]!;
-var connection = new SqliteConnection(connectionString);
-connection.Open();
-builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseSqlite(connection));
+string connectionString = builder.Configuration.GetConnectionString("WineAndFoodDBConnectionString");
+
+builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure")));
 #endregion
 
 
@@ -69,25 +75,89 @@ builder.Services.AddHttpClient("geminiHttpClient")
     .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(geminiApiRelisienceConfig));
 #endregion
 
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+
+var secret = builder.Configuration["Jwt:Secret"]; // Jwt__Secret
+if (string.IsNullOrWhiteSpace(secret))
+    throw new InvalidOperationException("Configura la variable de entorno Jwt__Secret.");
+
+// DI security
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+// Password hasher
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+// JWT Bearer
+var issuer = builder.Configuration["Jwt:Issuer"] ?? "VidAndFood.Api";
+var audience = builder.Configuration["Jwt:Audience"] ?? "VidAndFood.Client";
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+
+builder.Services
+  .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  .AddJwtBearer(o =>
+  {
+      o.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuerSigningKey = true,
+          IssuerSigningKey = key,
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidIssuer = issuer,
+          ValidAudience = audience,
+      };
+  });
 
 
 #region Services Application
 builder.Services.AddSingleton<IGeminiClient,GeminiApiService>();
+builder.Services.AddScoped<IUserService,UserServices>();
+builder.Services.AddScoped<IWineService,WineService>();
+builder.Services.AddScoped<ICellarPhysicsService, CellarPhysicsService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IWineUserService, WineUserService>();
+builder.Services.AddScoped<IAuthentication, AuthService>();
+builder.Services.AddScoped<IGrapeService, GrapeService>();
+
 #endregion
 
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Configuration.AddEnvironmentVariables();
+
+
+builder.Services.AddAuthorization();
 
 
 
 #region Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IWineRepository, WineRepository>();
+builder.Services.AddScoped<IGrapeRepository, GrapeRepository>();
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+builder.Services.AddScoped<IWineUserRepository, WineUserRepository>();
+builder.Services.AddScoped<IWineFavouriteRepository, WineFavouriteRepository>();
+builder.Services.AddScoped<ICellarItemRepository, CellarItemRepository>();
+builder.Services.AddScoped<ICellarRepository, CellarRepository>();
+
 
 #endregion
 
 ;
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        name: "AllowOrigin",
+        policyBuilder =>
+        {
+            policyBuilder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+        });
+});
 
 var app = builder.Build();
 

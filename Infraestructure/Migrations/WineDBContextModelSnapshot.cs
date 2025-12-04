@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,28 +16,41 @@ namespace Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.22")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Domain.Entities.CellarPhysics", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Capacity")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UuId");
 
                     b.HasIndex("UserId");
 
@@ -45,205 +59,350 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Grape", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UuId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Grapes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Rating", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("Rate")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
-                    b.Property<int>("WineId")
-                        .HasColumnType("INTEGER");
+                    b.Property<bool>("IsPublic")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
-                    b.HasKey("Id");
+                    b.Property<string>("Review")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
-                    b.HasIndex("UserId");
+                    b.Property<int>("Score")
+                        .HasColumnType("integer")
+                        .HasColumnName("score");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UserUuId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("WineUuId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UuId");
+
+                    b.HasIndex("UserUuId");
 
                     b.HasIndex("WineId");
 
-                    b.ToTable("Ratings");
+                    b.HasIndex("WineUuId");
+
+                    b.HasIndex("UserId", "WineId")
+                        .IsUnique();
+
+                    b.ToTable("Ratings", t =>
+                        {
+                            t.HasCheckConstraint("CK_Rating_Score", "score >= 1 AND score <= 5");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
-                    b.Property<int>("RoleUser")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("RoleUser")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UuId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Domain.Entities.Wine", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Aroma")
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<double>("AverageScore")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("CountryName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("LabelImageUrl")
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("RatingCount")
+                        .HasColumnType("integer");
 
                     b.Property<string>("RegionName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
                     b.Property<string>("TastingNotes")
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("VintageYear")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    b.Property<string>("WineType")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
 
                     b.Property<string>("WineryName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
-                    b.Property<int>("WyneType")
-                        .HasColumnType("INTEGER");
+                    b.HasKey("UuId");
 
-                    b.HasKey("Id");
+                    b.HasIndex("Name", "VintageYear");
 
                     b.ToTable("Wines");
                 });
 
-            modelBuilder.Entity("Domain.Entities.WineGrapeVariety", b =>
+            modelBuilder.Entity("Domain.Entities.WineFavorite", b =>
                 {
-                    b.Property<int>("GrapeId")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("GrapeId1")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("Percentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("WineId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("GrapeId");
-
-                    b.HasIndex("GrapeId1");
+                    b.HasKey("UserId", "WineId");
 
                     b.HasIndex("WineId");
 
-                    b.ToTable("WineGrapeVarieties");
+                    b.ToTable("WineFavorites");
+                });
+
+            modelBuilder.Entity("Domain.Entities.WineGrapeVariety", b =>
+                {
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GrapeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Percentage")
+                        .HasColumnType("integer")
+                        .HasColumnName("percentage");
+
+                    b.HasKey("WineId", "GrapeId");
+
+                    b.HasIndex("GrapeId");
+
+                    b.ToTable("WineGrapeVarieties", t =>
+                        {
+                            t.HasCheckConstraint("CK_WineGrapeVariety_Percentage", "percentage IS NULL OR (percentage >= 0 AND percentage <= 100)");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.WineUser", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CellearPhysisIdId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Opinion")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastConsumedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TastingNotes")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("TimesConsumed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("WineId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("uuid");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("CellearPhysisIdId");
-
-                    b.HasIndex("UserId");
+                    b.HasKey("UuId");
 
                     b.HasIndex("WineId");
+
+                    b.HasIndex("UserId", "WineId")
+                        .IsUnique();
 
                     b.ToTable("WineUsers");
                 });
 
             modelBuilder.Entity("Domain.Entities.WineUserCellarItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("UuId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("CellarPhysicsId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("CellarPhysicsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LocationNote")
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal?>("PurchasePrice")
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("quantity");
 
-                    b.Property<int>("WineUserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("WineId")
+                        .HasColumnType("uuid");
 
-                    b.HasIndex("CellarPhysicsId");
+                    b.HasKey("UuId");
 
-                    b.HasIndex("WineUserId");
+                    b.HasIndex("WineId");
 
-                    b.ToTable("WineUserCellarItems");
+                    b.HasIndex("CellarPhysicsId", "WineId")
+                        .IsUnique();
+
+                    b.ToTable("WineUserCellarItems", t =>
+                        {
+                            t.HasCheckConstraint("CK_CellarItem_Quantity", "quantity > 0");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.CellarPhysics", b =>
@@ -265,8 +424,35 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.User", null)
+                        .WithMany("Ratings")
+                        .HasForeignKey("UserUuId");
+
                     b.HasOne("Domain.Entities.Wine", "Wine")
                         .WithMany()
+                        .HasForeignKey("WineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Wine", null)
+                        .WithMany("Ratings")
+                        .HasForeignKey("WineUuId");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Wine");
+                });
+
+            modelBuilder.Entity("Domain.Entities.WineFavorite", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("Favorites")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Wine", "Wine")
+                        .WithMany("FavoritedByUsers")
                         .HasForeignKey("WineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -279,13 +465,13 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.WineGrapeVariety", b =>
                 {
                     b.HasOne("Domain.Entities.Grape", "Grape")
-                        .WithMany()
-                        .HasForeignKey("GrapeId1")
+                        .WithMany("WineGrapeVarieties")
+                        .HasForeignKey("GrapeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Wine", "Wine")
-                        .WithMany()
+                        .WithMany("WineGrapeVarieties")
                         .HasForeignKey("WineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -297,14 +483,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.WineUser", b =>
                 {
-                    b.HasOne("Domain.Entities.CellarPhysics", "CellearPhysisId")
-                        .WithMany()
-                        .HasForeignKey("CellearPhysisIdId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("WineUsers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -312,10 +492,8 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Wine", "Wine")
                         .WithMany()
                         .HasForeignKey("WineId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("CellearPhysisId");
 
                     b.Navigation("User");
 
@@ -325,20 +503,50 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.WineUserCellarItem", b =>
                 {
                     b.HasOne("Domain.Entities.CellarPhysics", "CellarPhysics")
-                        .WithMany()
+                        .WithMany("Items")
                         .HasForeignKey("CellarPhysicsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.WineUser", "WineUser")
-                        .WithMany()
-                        .HasForeignKey("WineUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Domain.Entities.Wine", "Wine")
+                        .WithMany("CellarItems")
+                        .HasForeignKey("WineId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("CellarPhysics");
 
-                    b.Navigation("WineUser");
+                    b.Navigation("Wine");
+                });
+
+            modelBuilder.Entity("Domain.Entities.CellarPhysics", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Grape", b =>
+                {
+                    b.Navigation("WineGrapeVarieties");
+                });
+
+            modelBuilder.Entity("Domain.Entities.User", b =>
+                {
+                    b.Navigation("Favorites");
+
+                    b.Navigation("Ratings");
+
+                    b.Navigation("WineUsers");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Wine", b =>
+                {
+                    b.Navigation("CellarItems");
+
+                    b.Navigation("FavoritedByUsers");
+
+                    b.Navigation("Ratings");
+
+                    b.Navigation("WineGrapeVarieties");
                 });
 #pragma warning restore 612, 618
         }

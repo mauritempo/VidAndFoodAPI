@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,12 +9,13 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Grape
+    public class Grape : BaseEntity
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        
         [Required]
         public string Name { get; set; }
+
+        public virtual ICollection<WineGrapeVariety> WineGrapeVarieties { get; set; } = new List<WineGrapeVariety>(); // <-- Agregá esta línea
 
     }
 }

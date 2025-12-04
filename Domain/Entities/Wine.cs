@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Enums;
+﻿using Domain.common;
+using Domain.Entities.Enums;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Wine 
+    public class Wine : BaseEntity
     {
-        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -24,15 +23,26 @@ namespace Domain.Entities
 
 
         [Required]
-        public WineType WyneType { get; set; }
+        public WineType WineType { get; set; }
 
         public int VintageYear { get; set; }
         public string? LabelImageUrl { get; set; }
         public string? TastingNotes { get; set; }
 
+        public decimal Price { get; set; }
+
+        public double AverageScore { get; set; }
+
+        public int RatingCount { get; set; }
         public string? Aroma { get; set; }
 
         public bool IsActive { get; set; } = true;
 
+        public virtual ICollection<WineGrapeVariety> WineGrapeVarieties { get; set; } = new List<WineGrapeVariety>();
+        public virtual ICollection<WineFavorite> FavoritedByUsers { get; set; } = new List<WineFavorite>();
+        public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+
+        // Relación con el inventario físico (para saber quién tiene este vino)
+        public virtual ICollection<WineUserCellarItem> CellarItems { get; set; } = new List<WineUserCellarItem>();
     }
 }
