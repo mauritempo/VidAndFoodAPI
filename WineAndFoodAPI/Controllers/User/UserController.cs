@@ -25,7 +25,6 @@ namespace WineAndFoodAPI.Controllers.User
         }
 
         [HttpGet("all")] 
-        [Authorize]
         public async Task<ActionResult<List<UserProfileDto>>> GetAllUsers()
         {
             try
@@ -45,7 +44,6 @@ namespace WineAndFoodAPI.Controllers.User
         }
 
         [HttpPut("upgrade-to-sommelier")]
-        [Authorize]// POST: api/users/upgrade-to-sommelier
         public async Task<IActionResult> UpgradeToSommelier()
         {
             try
@@ -76,7 +74,6 @@ namespace WineAndFoodAPI.Controllers.User
         }
 
         [HttpGet("{id}")] // GET: api/users/d290f1ee-6c54...
-        [Authorize]
         public async Task<ActionResult<UserProfileDto>> GetUserById(Guid id)
         {
             try
