@@ -70,8 +70,14 @@ jobs:
       - name: install dotnet-ef tool
         run: dotnet tool install --global dotnet-ef --version 8.*
 
+      # --- PASO DE DEBUG: Esto listará todos los archivos para confirmar dónde están ---
+      - name: Debug - List Files
+        run: Get-ChildItem -Recurse
+      # -----------------------------------------------------------------------------
+
       - name: Update database with EF Core migrations
-        run: dotnet ef database update --project ./back/Infraestructure/Infraestructure.csproj --startup-project ./back/WineAndFoodAPI/WineAndFoodAPI.csproj
+        # Usamos la ruta SIN 'back/', igual que en tu paso de Build
+        run: dotnet ef database update --project Infraestructure/Infraestructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
