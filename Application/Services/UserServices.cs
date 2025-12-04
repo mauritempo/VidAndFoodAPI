@@ -47,6 +47,37 @@ namespace Application.Services
             };
         }
 
+        public async Task UpgradeToSommelierAsync()
+        {
+            // 1. Obtenemos el ID del token (sin pedirlo por parámetro)
+            var userId = _current.UserId;
+
+            // 2. Buscamos al usuario en la BD (asumiendo que tu repo tiene GetByIdAsync)
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("Usuario no encontrado.");
+            }
+
+            // 3. Validaciones de negocio
+            if (user.RoleUser == Role.Sommelier)
+            {
+                throw new InvalidOperationException("¡Ya eres un Sommelier!");
+            }
+
+            if (user.RoleUser == Role.Admin)
+            {
+                throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
+            }
+
+            // 4. Aplicamos el cambio ÚNICO permitido
+            user.RoleUser = Role.Sommelier;
+
+            // 5. Guardamos
+            await _userRepository.UpdateAsync(user);
+        }
+
         public async Task<UserDto?> GetByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return null;

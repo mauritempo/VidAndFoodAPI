@@ -22,6 +22,29 @@ namespace WineAndFoodAPI.Controllers.User
             _authService = authentication;
         }
 
+        [HttpPost("upgrade-to-sommelier")] // POST: api/users/upgrade-to-sommelier
+        public async Task<IActionResult> UpgradeToSommelier()
+        {
+            try
+            {
+                await _service.UpgradeToSommelierAsync();
+                return Ok(new { message = "¡Felicidades! Tu cuenta ha sido actualizada a Sommelier." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // 409 Conflict o 400 Bad Request
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error al actualizar el rol: " + ex.Message });
+            }
+        }
+
 
         [HttpGet("{id}/asd")]
         public string Get(int id)
