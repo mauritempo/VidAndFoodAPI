@@ -77,6 +77,7 @@ jobs:
 
       - name: Update database with EF Core migrations
         env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_POSTGRESQL_CONNECTIONSTRING }}
           Jwt__Secret: ${{ secrets.JWT_SECRET }}
           Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
 
