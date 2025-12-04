@@ -14,5 +14,7 @@ namespace Application.Interfaces
         Task<UserDto?> GetByEmailAsync(string email);
         Task<UserDto> CreateUserAsync(UserCreateDto dto);
         Task<UserDto?> GetByIdAsync(int id);
+
+        Task<UserProfileDto> GetUserByIdAsync(Guid id);
     }
 }

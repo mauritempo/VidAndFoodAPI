@@ -25,6 +25,28 @@ namespace Application.Services
             _current = current;
         }
 
+        public async Task<UserProfileDto> GetUserByIdAsync(Guid id)
+        {
+            // Asumo que tienes un _userRepository genérico o específico
+            // Si usas BaseRepository, seguramente tienes GetByIdAsync(id)
+            var user = await _userRepository.GetByIdAsync(id);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"El usuario con ID {id} no existe.");
+            }
+
+            return new UserProfileDto
+            {
+                Id = user.UuId,
+                Email = user.Email,
+                FullName = user.Email, // Placeholder si no tienes campo nombre
+                Role = user.RoleUser.ToString(),
+                IsActive = user.IsActive,
+                CreatedAt = user.CreatedAt
+            };
+        }
+
         public async Task<UserDto?> GetByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return null;

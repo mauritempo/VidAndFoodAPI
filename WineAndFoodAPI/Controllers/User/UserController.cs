@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Application.Models.Request.Auth;
 using Application.Models.Request.User;
+using Application.Models.Response.User;
 using Application.Services;
 using Domain.Entities.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -22,10 +23,28 @@ namespace WineAndFoodAPI.Controllers.User
         }
 
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/asd")]
         public string Get(int id)
         {
             return "value";
+        }
+
+        [HttpGet("{id}")] // GET: api/users/d290f1ee-6c54...
+        public async Task<ActionResult<UserProfileDto>> GetUserById(Guid id)
+        {
+            try
+            {
+                var userProfile = await _service.GetUserByIdAsync(id);
+                return Ok(userProfile);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("register")]
