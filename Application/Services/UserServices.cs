@@ -40,7 +40,7 @@ namespace Application.Services
             {
                 Id = user.UuId,
                 Email = user.Email,
-                FullName = user.Email, // Placeholder si no tienes campo nombre
+                FullName = user.FullName, // Placeholder si no tienes campo nombre
                 Role = user.RoleUser.ToString(),
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt
