@@ -77,12 +77,13 @@ jobs:
 
       - name: Update database with EF Core migrations
         env:
-          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_POSTGRESQL_CONNECTIONSTRING }}
+          # CORRECCIÓN: Usar el nombre real de tu secreto en GitHub (DB_CONNECTION_STRING)
+          ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
           Jwt__Secret: ${{ secrets.JWT_SECRET }}
           Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
-
         run: dotnet ef database update --project Infraestructure/Infrastructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
-        
+
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
