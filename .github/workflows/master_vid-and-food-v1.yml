@@ -82,7 +82,7 @@ jobs:
           Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
 
         run: dotnet ef database update --project Infraestructure/Infrastructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
-
+        
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
