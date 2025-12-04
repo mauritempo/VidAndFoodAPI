@@ -76,7 +76,10 @@ jobs:
       # -----------------------------------------------------------------------------
 
       - name: Update database with EF Core migrations
-        # Fíjate bien: La carpeta es 'Infraestructure' pero el archivo es 'Infrastructure.csproj'
+        env:
+          Jwt__Secret: ${{ secrets.JWT_SECRET }}
+          Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
+
         run: dotnet ef database update --project Infraestructure/Infrastructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
 
       - name: Deploy to Azure Web App
