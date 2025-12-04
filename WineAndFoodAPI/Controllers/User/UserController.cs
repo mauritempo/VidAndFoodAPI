@@ -4,6 +4,7 @@ using Application.Models.Request.User;
 using Application.Models.Response.User;
 using Application.Services;
 using Domain.Entities.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography.X509Certificates;
 
@@ -12,6 +13,7 @@ namespace WineAndFoodAPI.Controllers.User
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class UserController : ControllerBase
     {
         private readonly IUserService _service;
@@ -22,7 +24,28 @@ namespace WineAndFoodAPI.Controllers.User
             _authService = authentication;
         }
 
-        [HttpPut("upgrade-to-sommelier")] // POST: api/users/upgrade-to-sommelier
+        [HttpGet("all")] 
+        [Authorize]
+        public async Task<ActionResult<List<UserProfileDto>>> GetAllUsers()
+        {
+            try
+            {
+                var users = await _service.GetAllUsersAsync();
+                return Ok(users);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Retorna 403 Forbidden si no es Admin
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("upgrade-to-sommelier")]
+        [Authorize]// POST: api/users/upgrade-to-sommelier
         public async Task<IActionResult> UpgradeToSommelier()
         {
             try
@@ -53,6 +76,7 @@ namespace WineAndFoodAPI.Controllers.User
         }
 
         [HttpGet("{id}")] // GET: api/users/d290f1ee-6c54...
+        [Authorize]
         public async Task<ActionResult<UserProfileDto>> GetUserById(Guid id)
         {
             try

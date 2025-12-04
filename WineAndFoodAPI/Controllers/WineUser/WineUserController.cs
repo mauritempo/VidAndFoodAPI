@@ -2,6 +2,7 @@
 using Application.Models.Request.Wines;
 using Application.Models.Response.Wines;
 using Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WineAndFoodAPI.Controllers.WineUser
@@ -20,13 +21,15 @@ namespace WineAndFoodAPI.Controllers.WineUser
         }
 
         [HttpGet("history")]
+        [Authorize]
         public async Task<ActionResult<List<WineListItemDto>>> GetHistory()
         {
             var history = await _wineUserService.GetHistoryList();
             return Ok(history);
         }
 
-        [HttpGet("favorites")] 
+        [HttpGet("favorites")]
+        [Authorize]
         public async Task<ActionResult<List<WineListItemDto>>> GetFavorites()
         {
             try
@@ -40,7 +43,8 @@ namespace WineAndFoodAPI.Controllers.WineUser
             }
         }
 
-        [HttpPost("{wineId}/favorite")] // Ruta: POST /api/wines/{id}/favorite
+        [HttpPost("{wineId}/favorite")]
+        [Authorize]// Ruta: POST /api/wines/{id}/favorite
         public async Task<IActionResult> CreateFavourite(Guid wineId)
         {
             try
@@ -59,6 +63,7 @@ namespace WineAndFoodAPI.Controllers.WineUser
         }
 
         [HttpPost("{wineId}/history")]
+        [Authorize]
         public async Task<IActionResult> RegisterConsumption(Guid wineId)
         {
             try
@@ -80,7 +85,8 @@ namespace WineAndFoodAPI.Controllers.WineUser
             }
         }
 
-        [HttpDelete("{id}/favorite")] 
+        [HttpDelete("{id}/favorite")]
+        [Authorize]
         public async Task<IActionResult> RemoveFavorite(Guid id)
         {
             try
@@ -94,7 +100,8 @@ namespace WineAndFoodAPI.Controllers.WineUser
             }
         }
 
-        [HttpDelete("{id}/history")] 
+        [HttpDelete("{id}/history")]
+        [Authorize]
         public async Task<IActionResult> RemoveFromHistory(Guid id)
         {
             try

@@ -25,6 +25,29 @@ namespace Application.Services
             _current = current;
         }
 
+        public async Task<List<UserProfileDto>> GetAllUsersAsync()
+        {
+            // 1. VALIDACIÓN DE ROL: Solo Admins
+            if (_current.Role != Role.Admin)
+            {
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden ver el listado de usuarios.");
+            }
+
+            // 2. Obtener usuarios del repo
+            var users = await _userRepository.GetAll();
+
+            // 3. Mapeo a DTO
+            return users.Select(u => new UserProfileDto
+            {
+                Id = u.UuId,
+                Email = u.Email,
+                FullName = u.Email, // O u.Name + " " + u.LastName si lo tienes
+                Role = u.RoleUser.ToString(),
+                IsActive = u.IsActive,
+                CreatedAt = u.CreatedAt
+            }).ToList();
+        }
+
         public async Task<UserProfileDto> GetUserByIdAsync(Guid id)
         {
             // Asumo que tienes un _userRepository genérico o específico
