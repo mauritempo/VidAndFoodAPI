@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(WineDBContext))]
-    [Migration("20251202233847_migrationV1")]
+    [Migration("20251212153355_migrationV1")]
     partial class migrationV1
     {
         /// <inheritdoc />
@@ -110,7 +110,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(2000)");
 
                     b.Property<int>("Score")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("score");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -140,7 +141,7 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("Ratings", t =>
                         {
-                            t.HasCheckConstraint("CK_Rating_Score", "\"Score\" >= 1 AND \"Score\" <= 5");
+                            t.HasCheckConstraint("CK_Rating_Score", "score >= 1 AND score <= 5");
                         });
                 });
 
@@ -223,7 +224,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasColumnType("numeric");
 
                     b.Property<int>("RatingCount")
@@ -298,7 +299,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<int?>("Percentage")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("percentage");
 
                     b.HasKey("WineId", "GrapeId");
 
@@ -306,7 +308,7 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("WineGrapeVarieties", t =>
                         {
-                            t.HasCheckConstraint("CK_WineGrapeVariety_Percentage", "(\"Percentage\" IS NULL) OR (\"Percentage\" >= 0 AND \"Percentage\" <= 100)");
+                            t.HasCheckConstraint("CK_WineGrapeVariety_Percentage", "percentage IS NULL OR (percentage >= 0 AND percentage <= 100)");
                         });
                 });
 
@@ -369,7 +371,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("DateAdded")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -379,12 +381,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<decimal?>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<int>("Quantity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(1);
+                        .HasDefaultValue(1)
+                        .HasColumnName("quantity");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -401,7 +404,7 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("WineUserCellarItems", t =>
                         {
-                            t.HasCheckConstraint("CK_CellarItem_Quantity", "\"Quantity\" > 0");
+                            t.HasCheckConstraint("CK_CellarItem_Quantity", "quantity > 0");
                         });
                 });
 
