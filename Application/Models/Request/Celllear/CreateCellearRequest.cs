@@ -11,8 +11,6 @@ namespace Application.Models.Request.Celllear
     {
         [Required]
         public string Name { get; set; } = string.Empty;
-
-        // Nuevo campo opcional
         public int? Capacity { get; set; }
     }
 }

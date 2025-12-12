@@ -9,6 +9,7 @@ namespace Domain.Interfaces.Repositories
 {
     public interface IGrapeRepository : IBaseRepository<Grape>
     {
-            
+        Task<Grape?> GetWithDetailsAsync(Guid id);
+        Task<bool> ExistsByNameAsync(string name, Guid? excludeId = null);
     }
 }

@@ -204,8 +204,6 @@ namespace Application.Services
 
         public async Task<List<string>> GetAllWineries()
         {
-            // Aquí podrías agregar caché si la lista es muy grande, 
-            // pero por ahora llamada directa es suficiente.
             return await _wineRepository.GetUniqueWineriesAsync();
         }
     }

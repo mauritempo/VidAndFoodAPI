@@ -46,6 +46,7 @@ namespace Application.mapper
                 ImageUrl = entity.LabelImageUrl,
                 AverageScore = entity.AverageScore,
                 IsActive = entity.IsActive,
+                IsWineDiscontinued = !entity.IsActive,
                 // Mapeo de la lista de uvas
                 Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
                 {
@@ -56,7 +57,6 @@ namespace Application.mapper
 
         }
 
-        // 3. De Entidad a RESPONSE (Lista Admin)
         public static WineAdminListItemDto ToAdminDto(this Wine entity)
         {
             return new WineAdminListItemDto
@@ -64,9 +64,17 @@ namespace Application.mapper
                 Id = entity.UuId,
                 Name = entity.Name,
                 WineryName = entity.WineryName,
+                RegionName = entity.RegionName,
                 Price = entity.Price,
                 VintageYear = entity.VintageYear,
-                IsActive = entity.IsActive
+                ImageUrl = entity.LabelImageUrl,
+                AverageScore = entity.AverageScore,
+                // Concatenamos las uvas para mostrar algo rápido en la tabla
+                GrapeNames = string.Join(", ", entity.WineGrapeVarieties.Select(wg => wg.Grape.Name)),
+                IsWineDiscontinued = !entity.IsActive,
+                IsActive = entity.IsActive,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt
             };
         }
 

@@ -10,8 +10,8 @@ namespace Application.Models.Request.Celllear
     {
         public Guid CellarId { get; set; }
         public Guid WineId { get; set; }
-        public int Quantity { get; set; } // Cuántas botellas sacó (generalmente 1)
-        public bool RegisterHistory { get; set; } = true; // ¿Lo bebió? (True) ¿O se rompió/regaló? (False)
-        public string? Notes { get; set; } // Notas de cata opcionales si lo bebió
+        public int Quantity { get; set; } 
+        public bool RegisterHistory { get; set; } = true; 
+        public string? Notes { get; set; } 
     }
 }
