@@ -1,4 +1,5 @@
-﻿using Application.Models.Response;
+﻿using Application.Models.Request.Grape;
+using Application.Models.Response;
 using Domain.Model.Shared;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,9 @@ namespace Application.Interfaces
     public interface IGrapeService
     {
         Task<List<GrapeResponseDto>> GetAllGrapes();
+        Task UpdateGrape(Guid id, UpdateGrapeRequest request);
+        Task CreateGrape(NewGrape newGrape);
+        Task DeleteGrape(Guid id);
+
     }
 }

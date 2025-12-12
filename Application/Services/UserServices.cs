@@ -41,7 +41,7 @@ namespace Application.Services
             {
                 Id = u.UuId,
                 Email = u.Email,
-                FullName = u.Email, // O u.Name + " " + u.LastName si lo tienes
+                FullName = u.FullName, // O u.Name + " " + u.LastName si lo tienes
                 Role = u.RoleUser.ToString(),
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt
@@ -50,8 +50,6 @@ namespace Application.Services
 
         public async Task<UserProfileDto> GetUserByIdAsync(Guid id)
         {
-            // Asumo que tienes un _userRepository genérico o específico
-            // Si usas BaseRepository, seguramente tienes GetByIdAsync(id)
             var user = await _userRepository.GetByIdAsync(id);
 
             if (user == null)
@@ -72,7 +70,6 @@ namespace Application.Services
 
         public async Task UpgradeToSommelierAsync()
         {
-            // 1. Obtenemos el ID del token (sin pedirlo por parámetro)
             var userId = _current.UserId;
 
             // 2. Buscamos al usuario en la BD (asumiendo que tu repo tiene GetByIdAsync)
@@ -99,6 +96,46 @@ namespace Application.Services
 
             // 5. Guardamos
             await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task DownGradeToUserAsync()
+        {
+            var userId = _current.UserId;
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("Usuario no encontrado.");
+            }
+            if (user.RoleUser == Role.Admin)
+            {
+                throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
+            }
+
+            user.RoleUser = Role.User;
+            await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task DeleteUserAsync(Guid id)
+        {
+            if (_current.Role != Role.Admin && _current.UserId != id)
+            {
+                throw new UnauthorizedAccessException("No tienes permisos para eliminar este usuario.");
+            }
+
+            // 2. Obtener el usuario
+            var user = await _userRepository.GetByIdAsync(id);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"El usuario con ID {id} no existe.");
+            }
+
+            if (user.RoleUser == Role.Admin && _current.Role != Role.Admin)
+            {
+                throw new InvalidOperationException("No puedes eliminar a un administrador sin ser administrador.");
+            }
+            await _userRepository.DeleteAsync(user);
         }
 
         public async Task<UserDto?> GetByEmailAsync(string email)
@@ -149,7 +186,6 @@ namespace Application.Services
 
         public async Task<UserDto?> GetByIdAsync(int id)
         {
-            // Nota: Si tu repositorio usa Guid, cambia 'int id' a 'Guid id'
             var u = await _userRepository.GetByIdAsync(id);
 
             // CORRECCIÓN: Usamos la extensión .ToDto()

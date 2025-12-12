@@ -66,12 +66,71 @@ namespace WineAndFoodAPI.Controllers.User
             }
         }
 
-
-        [HttpGet("{id}/asd")]
-        public string Get(int id)
+        [HttpPut("downgrade-to-user")]
+        [Authorize] // Asegúrate de que solo usuarios logueados entren aquí
+        public async Task<IActionResult> DowngradeToUser()
         {
-            return "value";
+            try
+            {
+                await _service.DownGradeToUserAsync();
+
+                // IMPORTANTE: El mensaje avisa al frontend que debe hacer algo
+                return Ok(new
+                {
+                    message = "Suscripción cancelada exitosamente. Tu cuenta ha vuelto al plan Básico.",
+                    // Un flag útil para que tu Frontend sepa que debe forzar logout o refrescar el token
+                    requiresLogout = true
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Por si un Admin intenta bajarse o si ya es usuario base
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error al procesar la baja: " + ex.Message });
+            }
         }
+
+        [HttpDelete("delete/{id}")]
+        [Authorize] // Obligatorio estar logueado
+        public async Task<IActionResult> DeleteUser(Guid id)
+        {
+            try
+            {
+                await _service.DeleteUserAsync(id);
+
+                // Retornamos un mensaje claro.
+                // Si el usuario se borró a sí mismo, el frontend debe recibir esto 
+                // y forzar un Logout inmediato.
+                return Ok(new { message = "Usuario y todos sus datos relacionados han sido eliminados permanentemente." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // 403 Forbidden: Intentó borrar a otro sin ser Admin
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // 400 Bad Request: Reglas de negocio (ej. borrar un admin protegido)
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error interno al eliminar usuario: " + ex.Message });
+            }
+        }
+
+
 
         [HttpGet("{id}")] // GET: api/users/d290f1ee-6c54...
         public async Task<ActionResult<UserProfileDto>> GetUserById(Guid id)
@@ -99,7 +158,7 @@ namespace WineAndFoodAPI.Controllers.User
 
             var user = await _service.CreateUserAsync(userForCreate);
 
-            return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
         }
 
         [HttpPost("login")]

@@ -12,7 +12,7 @@ namespace Application.Interfaces
     public interface IWineUserService
     {
         Task<List<WineListItemDto>> GetHistoryList();
-        Task RegisterConsumption(Guid wineId);
+        Task RegisterWineVisit(Guid wineId);
         Task<List<WineListItemDto>> ListFavoriteWines();
         Task ToggleFavorite(Guid wineId);
         Task<UserWineStatusDto> GetUserWineStatus(Guid wineId);

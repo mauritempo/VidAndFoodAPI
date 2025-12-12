@@ -42,11 +42,6 @@ namespace Infrastructure
                 b.Property(x => x.PasswordHash).IsRequired().HasMaxLength(256);
                 b.Property(x => x.IsActive).HasDefaultValue(true);
 
-                // Relación User -> WineUsers
-                b.HasMany(u => u.WineUsers)
-                    .WithOne(wu => wu.User)
-                    .HasForeignKey(wu => wu.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // WINE
@@ -168,9 +163,13 @@ namespace Infrastructure
                     .WithMany()
                     .HasForeignKey(wu => wu.WineId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasOne(wu => wu.User)
+                    .WithMany(u => u.WineUsers) 
+                    .HasForeignKey(wu => wu.UserId)
+                    .OnDelete(DeleteBehavior.Cascade); 
             });
 
-            // WINE USER CELLAR ITEM (BOTELLAS EN CAVA FÍSICA)
             modelBuilder.Entity<WineUserCellarItem>(b =>
             {
                 b.HasKey(x => x.UuId);

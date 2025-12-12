@@ -26,38 +26,38 @@ namespace Application.Services
             _currentUser = currentUser;
         }
 
-        public async Task ConsumeFromCellar(ConsumeItemRequest request)
-        {
-            var userId = _currentUser.UserId;
-            var userRole = _currentUser.Role;
+        //public async Task ConsumeFromCellar(ConsumeItemRequest request)
+        //{
+        //    var userId = _currentUser.UserId;
+        //    var userRole = _currentUser.Role;
 
-            if (userRole != Role.Sommelier)
-            {
-                throw new UnauthorizedAccessException("Solo los Sommeliers pueden gestionar el stock.");
-            }
-            var item = await _itemRepository.GetItemAsync(request.CellarId, request.WineId);
+        //    if (userRole != Role.Sommelier)
+        //    {
+        //        throw new UnauthorizedAccessException("Solo los Sommeliers pueden gestionar el stock.");
+        //    }
+        //    var item = await _itemRepository.GetItemAsync(request.CellarId, request.WineId);
 
-            if (item == null) throw new KeyNotFoundException("Vino no encontrado en esta cava");
+        //    if (item == null) throw new KeyNotFoundException("Vino no encontrado en esta cava");
 
-            if (item.Quantity < request.Quantity)
-                throw new InvalidOperationException($"Stock insuficiente. Tienes {item.Quantity}.");
+        //    if (item.Quantity < request.Quantity)
+        //        throw new InvalidOperationException($"Stock insuficiente. Tienes {item.Quantity}.");
 
-            item.Quantity -= request.Quantity;
+        //    item.Quantity -= request.Quantity;
 
-            if (item.Quantity <= 0)
-            {
-                await _itemRepository.DeleteAsync(item);
-            }
-            else
-            {
-                await _itemRepository.UpdateAsync(item);
-            }
+        //    if (item.Quantity <= 0)
+        //    {
+        //        await _itemRepository.DeleteAsync(item);
+        //    }
+        //    else
+        //    {
+        //        await _itemRepository.UpdateAsync(item);
+        //    }
 
-            if (request.RegisterHistory)
-            {
-                await _wineUserService.RegisterConsumption(request.WineId);
-            }
-        }
+        //    if (request.RegisterHistory)
+        //    {
+        //        await _wineUserService.RegisterWineVisit(request.WineId);
+        //    }
+        //}
 
         public async Task AddWineToCellar(AddWineToCellarRequest request)
         {
@@ -103,11 +103,13 @@ namespace Application.Services
             }
         }
 
+        //admin
+
         public async Task<CellarPhysics> CreateCellar(CreateCellarRequest request)
         {
             var userId = _currentUser.UserId;
             var userRole = _currentUser.Role;
-            if (userRole != Role.Sommelier)
+            if (userRole != Role.Sommelier )
             {
                 throw new UnauthorizedAccessException("Solo los Sommeliers pueden crear cavas.");
             }

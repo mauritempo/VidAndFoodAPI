@@ -16,7 +16,8 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
@@ -42,10 +43,18 @@ jobs:
     runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read 
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -57,6 +66,23 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F44805B1715F4E5D97FE9E7F3B7364F1 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_03F80CC519784B4CB2A15B07332867FD }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C4EF33B00DD24A54A834C62DB7067ABE }}
+      
+      - name: install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef --version 8.*
+
+      # --- PASO DE DEBUG: Esto listará todos los archivos para confirmar dónde están ---
+      - name: Debug - List Files
+        run: Get-ChildItem -Recurse
+      # -----------------------------------------------------------------------------
+
+      - name: Update database with EF Core migrations
+        env:
+          # CORRECCIÓN: Usar el nombre real de tu secreto en GitHub (DB_CONNECTION_STRING)
+          ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
+          Jwt__Secret: ${{ secrets.JWT_SECRET }}
+          Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
+        run: dotnet ef database update --project Infraestructure/Infrastructure.csproj --startup-project WineAndFoodAPI/WineAndFoodAPI.csproj
+
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -64,7 +90,4 @@ jobs:
         with:
           app-name: 'Vid-And-Food-V1'
           slot-name: 'Production'
-          # The download step extracts the artifact into a folder named after the artifact ('.net-app')
-          # Point the deploy action at that folder so it contains the published app files
           package: .
-          

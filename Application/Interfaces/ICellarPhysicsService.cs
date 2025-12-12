@@ -11,7 +11,7 @@ namespace Application.Interfaces
 {
     public interface ICellarPhysicsService
     {
-        Task ConsumeFromCellar(ConsumeItemRequest request);
+        //Task ConsumeFromCellar(ConsumeItemRequest request);
         Task AddWineToCellar(AddWineToCellarRequest request);
 
         Task<CellarPhysics> CreateCellar(CreateCellarRequest request);

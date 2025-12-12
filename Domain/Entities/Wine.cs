@@ -29,7 +29,7 @@ namespace Domain.Entities
         public string? LabelImageUrl { get; set; }
         public string? TastingNotes { get; set; }
 
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
 
         public double AverageScore { get; set; }
 

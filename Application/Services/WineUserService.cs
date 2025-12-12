@@ -27,10 +27,8 @@ namespace Application.Services
         {
             var userId = _currentUser.UserId;
 
-            // 1. Llamamos al repo sin parámetros de página
             var historyItems = await _wineUserRepository.GetAllHistoryAsync(userId);
 
-            // 2. Mapeamos directamente a la lista de DTOs
             var dtos = historyItems
                 .Select(h => h.Wine.ToListItemDto())
                 .ToList();
@@ -39,29 +37,25 @@ namespace Application.Services
         }
 
 
-        public async Task RegisterConsumption(Guid wineId)
+        public async Task RegisterWineVisit(Guid wineId)
         {
             var userId = _currentUser.UserId;
+            if (userId == Guid.Empty)
+            {
+                return; 
+            }
+
             var history = await _wineUserRepository.GetHistoryItemAsync(userId, wineId);
 
             if (history != null)
             {
-                history.TimesConsumed++; // Incrementamos contador
+                history.TimesConsumed++;
                 history.LastConsumedAt = DateTime.UtcNow;
 
                 await _wineUserRepository.UpdateAsync(history);
             }
             else
             {
-                if (_currentUser.Role == Role.User)
-                {
-                    var count = await _wineUserRepository.GetCountByUserAsync(userId);
-
-                    if (count >= 5)
-                    {
-                        throw new InvalidOperationException("Has alcanzado el límite de 30 vinos para cuentas gratuitas. Actualiza tu suscripción a Sommelier para guardar ilimitados.");
-                    }
-                }
                 var newHistory = new WineUser
                 {
                     UserId = userId,
@@ -69,10 +63,10 @@ namespace Application.Services
                     TimesConsumed = 1,
                     LastConsumedAt = DateTime.UtcNow,
                 };
+
                 await _wineUserRepository.AddAsync(newHistory);
             }
         }
-
 
 
         public async Task<List<WineListItemDto>> ListFavoriteWines()
