@@ -11,7 +11,7 @@ namespace WineAndFoodAPI.Controllers.GrapeController
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class GrapeController : ControllerBase
     {
         private readonly IGrapeService _grapeService;

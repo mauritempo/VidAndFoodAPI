@@ -53,19 +53,25 @@ namespace Application.Services
                 history.LastConsumedAt = DateTime.UtcNow;
 
                 await _wineUserRepository.UpdateAsync(history);
+                return;
             }
-            else
-            {
-                var newHistory = new WineUser
-                {
-                    UserId = userId,
-                    WineId = wineId,
-                    TimesConsumed = 1,
-                    LastConsumedAt = DateTime.UtcNow,
-                };
 
-                await _wineUserRepository.AddAsync(newHistory);
+            var count = await _wineUserRepository.CountHistoryAsync(userId);
+
+            if(count >= 5)
+            {
+                throw new InvalidOperationException("Historial lleno: solo podes tener hasta 5 vinos en tu historial.");
             }
+
+            var newHistory = new WineUser
+            {
+                UserId = userId,
+                WineId = wineId,
+                TimesConsumed = 1,
+                LastConsumedAt = DateTime.UtcNow,
+            };
+
+            await _wineUserRepository.AddAsync(newHistory);
         }
 
 
