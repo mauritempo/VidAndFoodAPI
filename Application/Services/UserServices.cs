@@ -86,10 +86,10 @@ namespace Application.Services
                 throw new InvalidOperationException("¡Ya eres un Sommelier!");
             }
 
-            if (user.RoleUser == Role.Admin)
-            {
-                throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
-            }
+            //if (user.RoleUser == Role.Admin)
+            //{
+            //    throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
+            //}
 
             // 4. Aplicamos el cambio ÚNICO permitido
             user.RoleUser = Role.Sommelier;
@@ -107,10 +107,10 @@ namespace Application.Services
             {
                 throw new KeyNotFoundException("Usuario no encontrado.");
             }
-            if (user.RoleUser == Role.Admin)
-            {
-                throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
-            }
+            //if (user.RoleUser == Role.Admin)
+            //{
+            //    throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
+            //}
 
             user.RoleUser = Role.User;
             await _userRepository.UpdateAsync(user);
