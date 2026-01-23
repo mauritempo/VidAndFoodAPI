@@ -201,6 +201,13 @@ namespace Application.Services
             // Mapeamos a DTO
             return wines.Select(w => w.ToListItemDto()).ToList();
         }
+        public async Task<List<WineListItemDto>> GetWineOfTheMonth()
+        {
+            var wines = await _wineRepository.GetTopRatedAsync();
+
+            // Mapeamos a DTO
+            return wines.Select(w => w.ToListItemDto()).ToList();
+        }
 
         public async Task<List<string>> GetAllWineries()
         {

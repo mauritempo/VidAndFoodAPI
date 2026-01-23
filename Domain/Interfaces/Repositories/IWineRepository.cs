@@ -20,5 +20,7 @@ namespace Domain.Interfaces.Repositories
 
         Task<List<string>> GetUniqueWineriesAsync();
 
+        Task<List<Wine>> GetTopRatedAsync();
+
     }
 }

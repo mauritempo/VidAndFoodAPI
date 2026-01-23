@@ -1,6 +1,8 @@
 ﻿using Application.Interfaces;
+using Application.Models.Request.Request;
 using Application.Models.Request.Wines;
 using Application.Models.Response.Wines;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,6 +32,16 @@ namespace WineAndFoodAPI.Controllers.Wines
             return Ok(wines);
         }
 
+
+
+        [HttpGet("wine-of-month")]
+        public async Task<ActionResult<IEnumerable<WineListItemDto>>> GetWineOfTheMonth()
+        {
+            var wines = await _wineService.GetWineOfTheMonth();
+
+            return Ok(wines);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<WineByIdResponseDto>> GetWineById(Guid id)
         {
@@ -52,6 +64,31 @@ namespace WineAndFoodAPI.Controllers.Wines
             }
         }
 
+        [HttpPost("{WineId:guid}/rate")]
+        public async Task<IActionResult> RateWine(Guid WineId, [FromBody] RateWineRequest request)
+        {
+            await _ratingService.RateWineAsync(WineId, request);
+            return Ok(new { message = "Rating guardado." });
+        }
+
+        [HttpPut("{WineId:guid}/rate-change")]
+        public async Task<IActionResult> ChangeRate(Guid WineId, [FromBody] RateWineRequest request)
+        {
+            if (request is null)
+                return BadRequest(new { message = "Body requerido." });
+
+            await _ratingService.RateWineAsync(WineId, request);
+            return Ok(new { message = "Rating guardado." });
+        }
+
+        [HttpDelete("{WineId:guid}/rate-delete")]
+        public async Task<IActionResult> DeleteRate(Guid WineId)
+        {
+            await _ratingService.DeleteRateAsync(WineId);
+            return Ok(new { message = "Rating guardado." });
+        }
+
+
         [HttpGet("filters/wineries")] 
         public async Task<ActionResult<IEnumerable<string>>> GetWineries()
         {
@@ -70,8 +107,6 @@ namespace WineAndFoodAPI.Controllers.Wines
             {
                 var newWine = await _wineService.CreateWine(request);
 
-                // Retornamos 201 Created con la URL para ver el vino
-                // Asumiendo que tienes un método llamado "GetWineById" en este controlador
                 return CreatedAtAction(nameof(GetWineById), new { id = newWine.Id }, newWine);
             }
             catch (UnauthorizedAccessException ex)

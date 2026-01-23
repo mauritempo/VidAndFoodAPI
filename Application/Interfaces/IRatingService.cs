@@ -10,7 +10,9 @@ namespace Application.Interfaces
 {
     public interface IRatingService
     {
-        Task RateWineAsync(RateWineRequest request);
+        Task RateWineAsync(Guid wineUuId, RateWineRequest request);
+
+        Task DeleteRateAsync(Guid wineUuId);
         Task UpdateWineStatistics(Guid wineId);
         Task<List<WineReviewDto>> GetWineReviews(Guid wineId);
 

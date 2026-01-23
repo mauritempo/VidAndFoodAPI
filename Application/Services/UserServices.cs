@@ -138,6 +138,30 @@ namespace Application.Services
             await _userRepository.DeleteAsync(user);
         }
 
+        public async Task ChangeRoleAsync(Guid userUuId, Role newRole)
+        {
+            if (_current.Role != Role.Admin)
+            {
+                throw new UnauthorizedAccessException("Acceso denegado. Solo administradores pueden cambiar roles.");
+            }
+
+            var user = await _userRepository.GetByIdAsync(userUuId);
+            if (user is null)
+                throw new KeyNotFoundException("Usuario no encontrado.");
+
+            if (user.RoleUser == newRole)
+                throw new InvalidOperationException("El usuario ya tiene ese rol.");
+
+            if (user.UuId == _current.UserId && newRole != Role.Admin)
+                throw new InvalidOperationException("No podés cambiar tu propio rol de administrador.");
+
+            user.RoleUser = newRole;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user);
+        }
+
+
         public async Task<UserDto?> GetByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return null;

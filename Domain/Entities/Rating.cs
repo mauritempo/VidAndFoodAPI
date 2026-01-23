@@ -10,8 +10,8 @@ namespace Domain.Entities
 {
     public class Rating : BaseEntity
     {
-        public Guid UserId { get; set; }  
-        public Guid WineId { get; set; }
+        public Guid UserUuId { get; set; }  
+        public Guid WineUuId { get; set; }
 
         [Range(1, 5)]
         public int Score { get; set; }

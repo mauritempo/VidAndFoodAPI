@@ -1,5 +1,6 @@
 ﻿using Application.Models.Request.User;
 using Application.Models.Response.User;
+using Domain.Entities.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,5 +23,8 @@ namespace Application.Interfaces
         Task<List<UserProfileDto>> GetAllUsersAsync();
 
         Task DeleteUserAsync(Guid id);
+
+        Task ChangeRoleAsync(Guid userUuId, Role newRole);
+
     }
 }

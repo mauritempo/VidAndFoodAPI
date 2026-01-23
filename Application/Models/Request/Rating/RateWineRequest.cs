@@ -8,7 +8,6 @@ namespace Application.Models.Request.Request
 {
     public class RateWineRequest
     {
-        public Guid WineId { get; set; }
         public int Score { get; set; } // 1 a 5
         public string? Review { get; set; }
     }

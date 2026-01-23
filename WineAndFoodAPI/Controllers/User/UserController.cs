@@ -74,11 +74,9 @@ namespace WineAndFoodAPI.Controllers.User
             {
                 await _service.DownGradeToUserAsync();
 
-                // IMPORTANTE: El mensaje avisa al frontend que debe hacer algo
                 return Ok(new
                 {
                     message = "Suscripción cancelada exitosamente. Tu cuenta ha vuelto al plan Básico.",
-                    // Un flag útil para que tu Frontend sepa que debe forzar logout o refrescar el token
                     requiresLogout = true
                 });
             }
@@ -88,7 +86,6 @@ namespace WineAndFoodAPI.Controllers.User
             }
             catch (InvalidOperationException ex)
             {
-                // Por si un Admin intenta bajarse o si ya es usuario base
                 return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
@@ -105,9 +102,6 @@ namespace WineAndFoodAPI.Controllers.User
             {
                 await _service.DeleteUserAsync(id);
 
-                // Retornamos un mensaje claro.
-                // Si el usuario se borró a sí mismo, el frontend debe recibir esto 
-                // y forzar un Logout inmediato.
                 return Ok(new { message = "Usuario y todos sus datos relacionados han sido eliminados permanentemente." });
             }
             catch (KeyNotFoundException ex)
@@ -116,7 +110,6 @@ namespace WineAndFoodAPI.Controllers.User
             }
             catch (UnauthorizedAccessException ex)
             {
-                // 403 Forbidden: Intentó borrar a otro sin ser Admin
                 return StatusCode(403, new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
@@ -129,6 +122,38 @@ namespace WineAndFoodAPI.Controllers.User
                 return StatusCode(500, new { message = "Error interno al eliminar usuario: " + ex.Message });
             }
         }
+
+        [HttpPut("change-role")]
+        [Authorize]
+        public async Task<IActionResult> ChangeRole([FromBody] ChangeUserRoleRequest request)
+        {
+            try
+            {
+                await _service.ChangeRoleAsync(request.UserUuId, request.NewRole);
+
+                return Ok(new
+                {
+                    message = $"Rol actualizado correctamente a {request.NewRole}."
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(); // o Unauthorized() si preferís 401
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error al actualizar el rol: " + ex.Message });
+            }
+        }
+
 
 
 

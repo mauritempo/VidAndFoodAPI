@@ -145,6 +145,18 @@ namespace Infrastructure.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<Wine>> GetTopRatedAsync()
+        {
+            return await _context.Set<Wine>()
+                .AsNoTracking()
+                .Where(w => w.IsActive)
+                .Where(w => w.AverageScore >= 4.9 && w.AverageScore <= 5.0)
+                .OrderByDescending(w => w.UpdatedAt ?? w.CreatedAt)
+                .Include(w => w.WineGrapeVarieties)
+                    .ThenInclude(gv => gv.Grape)
+                .ToListAsync();
+        }
+
 
     }
 }
