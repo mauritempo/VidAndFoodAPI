@@ -1,33 +1,32 @@
 ﻿using Polly;
 using Polly.Extensions.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using Infrastructure.Services.Resilience; // Asegúrate de que esto esté aquí
 
 namespace Infrastructure
 {
     public static class PollyResiliencePolicies
     {
-        public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        // Ahora acepta el objeto ApiClientConfiguration
+        public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(ApiClientConfiguration config)
         {
-            var jitter = new Random();
-
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.BadRequest)
-                .WaitAndRetryAsync(2, retryAttempt => new TimeSpan(0, 0, 4));
+                .OrResult(msg => msg.StatusCode == HttpStatusCode.BadRequest)
+                .WaitAndRetryAsync(
+                    config.RetryCount, 
+                    _ => TimeSpan.FromSeconds(config.RetryAttemptInSeconds)
+                );
         }
 
-        public static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy() =>
+        // Ahora acepta el objeto ApiClientConfiguration
+        public static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy(ApiClientConfiguration config) =>
            HttpPolicyExtensions
                .HandleTransientHttpError()
                .OrResult(r => r.StatusCode == HttpStatusCode.TooManyRequests)
                .CircuitBreakerAsync(
-                   handledEventsAllowedBeforeBreaking: 5,
-                   durationOfBreak: TimeSpan.FromSeconds(30)
+                   handledEventsAllowedBeforeBreaking: config.HandleEventsAllowedBeforeBreaking,
+                   durationOfBreak: TimeSpan.FromSeconds(config.DurationOfBreakInSeconds)
                );
     }
 }
