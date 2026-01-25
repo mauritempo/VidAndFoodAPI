@@ -98,48 +98,32 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsPublic")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Review")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
                     b.Property<int>("Score")
-                        .HasColumnType("integer")
-                        .HasColumnName("score");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("UserUuId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("UserUuId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("WineId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("WineUuId")
+                    b.Property<Guid>("WineUuId")
                         .HasColumnType("uuid");
 
                     b.HasKey("UuId");
 
-                    b.HasIndex("UserUuId");
-
-                    b.HasIndex("WineId");
-
                     b.HasIndex("WineUuId");
 
-                    b.HasIndex("UserId", "WineId")
+                    b.HasIndex("UserUuId", "WineUuId")
                         .IsUnique();
 
-                    b.ToTable("Ratings", t =>
-                        {
-                            t.HasCheckConstraint("CK_Rating_Score", "score >= 1 AND score <= 5");
-                        });
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -420,23 +404,15 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserUuId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("UserUuId");
 
                     b.HasOne("Domain.Entities.Wine", "Wine")
                         .WithMany()
-                        .HasForeignKey("WineId")
+                        .HasForeignKey("WineUuId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.Wine", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("WineUuId");
 
                     b.Navigation("User");
 
@@ -533,8 +509,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Favorites");
 
-                    b.Navigation("Ratings");
-
                     b.Navigation("WineUsers");
                 });
 
@@ -543,8 +517,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("CellarItems");
 
                     b.Navigation("FavoritedByUsers");
-
-                    b.Navigation("Ratings");
 
                     b.Navigation("WineGrapeVarieties");
                 });

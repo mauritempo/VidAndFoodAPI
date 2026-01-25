@@ -22,105 +22,42 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region Database
-string connectionString = builder.Configuration.GetConnectionString("WineAndFoodDBConnectionString");
 
-builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure")));
-#endregion
+var fromApp = builder.Configuration["Gemini:ApiKey"];
 
-Console.WriteLine("ConnectionString: " + connectionString);
+string connectionString = builder.Configuration["ConnectionStrings:WineAndFoodDBConnectionString"]!;
+var connection = new SqliteConnection(connectionString);
+connection.Open();
 
-#region Options (bind seguro)
-var geminiSection = builder.Configuration.GetSection(GeminiOptions.SectionName);
-
-builder.Services
-    .AddOptions<GeminiOptions>()
-    .Bind(geminiSection)
-    .PostConfigure(o =>
-    {
-        
-        var fromEnv = Environment.GetEnvironmentVariable("GOOGLE_API_KEY");
-        if (!string.IsNullOrWhiteSpace(fromEnv))
-            o.ApiKey = fromEnv;
-
-        
-        o.Model ??= "gemini-2.5-flash";
-        o.BaseUrl ??= "https://generativelanguage.googleapis.com/v1beta/";
-    })
-    .ValidateDataAnnotations()
-    .Validate(o => !string.IsNullOrWhiteSpace(o.ApiKey), "Gemini ApiKey is required.")
-    .Validate(o => Uri.TryCreate(o.BaseUrl, UriKind.Absolute, out _), "Gemini BaseUrl must be absolute.")
-    .ValidateOnStart();
-#endregion
-
-
-
-#region Services external APIs (Gemini)
-ApiClientConfiguration geminiApiRelisienceConfig = new()
+builder.Services.Configure<GeminiOptions>(o =>
 {
-    RetryCount = 2,
-    RetryAttemptInSeconds = 30,
-    DurationOfBreakInSeconds = 50,
-    HandleEventsAllowedBeforeBreaking = 10
-};
+    // Preferï¿½ env var si existe
+    var fromEnv = Environment.GetEnvironmentVariable("GOOGLE_API_KEY");
+    if (!string.IsNullOrWhiteSpace(fromEnv))
+        o.ApiKey = fromEnv;
 
-//generar un objt
-builder.Services.AddHttpClient("geminiHttpClient")
-    .ConfigureHttpClient((sp, client) =>
-    {
-        var opts = sp.GetRequiredService<IOptions<GeminiOptions>>().Value;
-        client.BaseAddress = new Uri(opts.BaseUrl);
-        
-    })
-    .AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy(geminiApiRelisienceConfig))
-    .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(geminiApiRelisienceConfig));
-#endregion
+    // appsettings fallback
+    var fromApp = builder.Configuration["Gemini:ApiKey"];
+    if (!string.IsNullOrWhiteSpace(fromApp) && string.IsNullOrWhiteSpace(o.ApiKey))
+        o.ApiKey = fromApp;
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+    // Modelo (opcional)
+    o.Model = builder.Configuration["Gemini:Model"] ?? "gemini-1.5-flash";
 
-var secret = builder.Configuration["Jwt:Secret"]; // Jwt__Secret
-if (string.IsNullOrWhiteSpace(secret))
-    throw new InvalidOperationException("Configura la variable de entorno Jwt__Secret.");
+    if (string.IsNullOrWhiteSpace(o.ApiKey))
+        throw new InvalidOperationException("Google Gemini API key is not set. Configure 'GOOGLE_API_KEY' env var or 'Gemini:ApiKey' in appsettings.");
+});
 
-// DI security
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICurrentUser, CurrentUser>();
-builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-// Password hasher
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-// JWT Bearer
-var issuer = builder.Configuration["Jwt:Issuer"] ?? "VidAndFood.Api";
-var audience = builder.Configuration["Jwt:Audience"] ?? "VidAndFood.Client";
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+builder.Services.AddHttpClient("Gemini", client =>
+{
+    // Si tu SDK maneja las URLs, no seteï¿½s BaseAddress.
+    // Si NO, configurï¿½ acï¿½ el endpoint base del servicio que use el SDK.
+    client.Timeout = TimeSpan.FromSeconds(20);
+})
+.AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy())
+.AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy());
 
-builder.Services
-  .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-  .AddJwtBearer(o =>
-  {
-      o.TokenValidationParameters = new TokenValidationParameters
-      {
-          ValidateIssuerSigningKey = true,
-          IssuerSigningKey = key,
-          ValidateIssuer = true,
-          ValidateAudience = true,
-          ValidIssuer = issuer,
-          ValidAudience = audience,
-      };
-  });
-
-
-#region Services Application
-builder.Services.AddSingleton<IGeminiClient,GeminiApiService>();
-builder.Services.AddScoped<IUserService,UserServices>();
-builder.Services.AddScoped<IWineService,WineService>();
-builder.Services.AddScoped<ICellarPhysicsService, CellarPhysicsService>();
-builder.Services.AddScoped<IRatingService, RatingService>();
-builder.Services.AddScoped<IWineUserService, WineUserService>();
-builder.Services.AddScoped<IAuthentication, AuthService>();
-builder.Services.AddScoped<IGrapeService, GrapeService>();
-
-#endregion
-
+builder.Services.AddCors();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -130,7 +67,7 @@ builder.Services.AddSwaggerGen(setupAction =>
     {
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
-        Description = "Acá pegar el token generado al loguearse."
+        Description = "Acï¿½ pegar el token generado al loguearse."
     });
 
     setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -142,7 +79,7 @@ builder.Services.AddSwaggerGen(setupAction =>
                 {
                     Type = ReferenceType.SecurityScheme,
                     Id = "VidAndFoodAPIBearerAuth" 
-                } //Tiene que coincidir con el id seteado arriba en la definición
+                } //Tiene que coincidir con el id seteado arriba en la definiciï¿½n
                 }, new List<string>() }
     });
 });
@@ -163,7 +100,11 @@ builder.Services.AddScoped<IWineFavouriteRepository, WineFavouriteRepository>();
 builder.Services.AddScoped<ICellarItemRepository, CellarItemRepository>();
 builder.Services.AddScoped<ICellarRepository, CellarRepository>();
 
+#endregion
 
+#region Services
+// Registra el servicio y pasa la API key y el cliente configurado
+builder.Services.AddSingleton<IGeminiApiService, GeminiAPIService>();
 #endregion
 
 ;
@@ -195,6 +136,7 @@ app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseAuthentication();
 
+app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173"));
 app.UseAuthorization();
 
 app.MapControllers();

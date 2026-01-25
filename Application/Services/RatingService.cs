@@ -74,10 +74,15 @@ namespace Application.Services
                 var userUuId = _currentUser.UserId;
                 var role = _currentUser.Role;
 
-                bool isPublic = IsPublicByRole(role);
+                //if (role == Role.Admin)
+                //{
+                //    rating = await _ratingRepository.GetByWineAsync(wineUuId);
+                //}
 
                 var existing = await _ratingRepository
                     .GetByUserAndWineAsync(userUuId, wineUuId);
+
+                
 
                 if (existing is not null)
                 {
