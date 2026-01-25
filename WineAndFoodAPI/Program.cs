@@ -126,6 +126,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setupAction =>
 {
+    setupAction.CustomSchemaIds(type => type.FullName);
     setupAction.AddSecurityDefinition("VidAndFoodAPIBearerAuth", new OpenApiSecurityScheme() //Esto va a permitir usar swagger con el token.
     {
         Type = SecuritySchemeType.Http,
