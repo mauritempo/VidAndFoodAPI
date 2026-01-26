@@ -119,7 +119,11 @@ namespace Infrastructure
             {
                 b.HasKey(x => x.UuId);
 
-                b.HasIndex(x => new { x.UserUuId, x.WineUuId }).IsUnique();
+                // Índice único para solo 1 rating ACTIVO por usuario-vino
+                // Permite múltiples ratings inactivos (histórico)
+                b.HasIndex(x => new { x.UserUuId, x.WineUuId, x.IsActive })
+                    .IsUnique()
+                    .HasFilter("\"IsActive\" = true");
 
                 b.HasOne(r => r.User)
                     .WithMany()
