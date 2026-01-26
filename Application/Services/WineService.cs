@@ -66,7 +66,7 @@ namespace Application.Services
 
             if (wine == null)
                 throw new KeyNotFoundException($"No se encontró el vino con ID {id}");
-
+            
             wine.Name = request.Name;
             wine.Price = request.Price;
             wine.VintageYear = request.VintageYear;
