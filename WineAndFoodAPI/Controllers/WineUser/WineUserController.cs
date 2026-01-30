@@ -37,7 +37,10 @@ namespace WineAndFoodAPI.Controllers.WineUser
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                // ERROR ANTERIOR: return Forbid(ex.Message); <--- ESTO ESTABA MAL
+
+                // CORRECCIÓN: Devolver un objeto JSON con el código 403
+                return StatusCode(403, new { message = ex.Message });
             }
         }
 

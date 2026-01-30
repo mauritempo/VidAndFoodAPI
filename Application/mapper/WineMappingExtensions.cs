@@ -57,19 +57,6 @@ namespace Application.mapper
                     Name = g.Grape?.Name ?? "Sin nombre"
                 }).ToList() ?? new List<GrapeResponseDto>(),
 
-                Reviews = entity.Ratings?
-            .Where(r => r.User != null) // Filtrar si usuario es null
-            .Select(r => new WineReviewDto
-            {
-                UserName = r.User.FullName ?? "Usuario Anónimo",
-                Score = r.Score,
-                Review = r.Review ?? "",
-                CreatedAt = r.UpdatedAt ?? r.CreatedAt,
-                IsSommelierReview = r.IsSommelier
-            })
-            .OrderByDescending(r => r.IsSommelierReview)
-            .ThenByDescending(r => r.CreatedAt)
-            .ToList() ?? new List<WineReviewDto>()
             };
 
         }

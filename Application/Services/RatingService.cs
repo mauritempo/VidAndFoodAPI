@@ -66,7 +66,7 @@ namespace Application.Services
                     isBySommelier = false;
                 }
 
-            bool sommelier = IsBySommelier(role);
+                bool sommelier = IsBySommelier(role);
 
                 var existing = await _ratingRepository.GetByUserAndWineAsync(userUuId, wineUuId);
 
@@ -93,7 +93,7 @@ namespace Application.Services
                     await _ratingRepository.AddAsync(rating);
                 }
                 await UpdateWineStatistics(wineUuId);
-                }
+            }
                 
         
             public async Task DeleteRateAsync(Guid wineUuId)
