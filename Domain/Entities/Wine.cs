@@ -41,6 +41,7 @@ namespace Domain.Entities
         public virtual ICollection<WineGrapeVariety> WineGrapeVarieties { get; set; } = new List<WineGrapeVariety>();
         public virtual ICollection<WineFavorite> FavoritedByUsers { get; set; } = new List<WineFavorite>();
         // Relación con el inventario físico (para saber quién tiene este vino)
+        public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
         public virtual ICollection<WineUserCellarItem> CellarItems { get; set; } = new List<WineUserCellarItem>();
     }
 }

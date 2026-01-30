@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(WineDBContext))]
-    partial class WineDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260126162231_Fix_Rating_UniqueIndex_AllowMultiple")]
+    partial class Fix_Rating_UniqueIndex_AllowMultiple
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,7 +100,7 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsSommelier")
+                    b.Property<bool>("IsPublic")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Review")
@@ -120,7 +123,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("WineUuId");
 
-                    b.HasIndex("UserUuId", "WineUuId", "IsSommelier")
+                    b.HasIndex("UserUuId", "WineUuId", "IsActive")
                         .IsUnique()
                         .HasFilter("\"IsActive\" = true");
 
@@ -410,7 +413,7 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Wine", "Wine")
-                        .WithMany("Ratings")
+                        .WithMany()
                         .HasForeignKey("WineUuId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -518,8 +521,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("CellarItems");
 
                     b.Navigation("FavoritedByUsers");
-
-                    b.Navigation("Ratings");
 
                     b.Navigation("WineGrapeVarieties");
                 });

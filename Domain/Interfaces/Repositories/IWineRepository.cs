@@ -18,6 +18,8 @@ namespace Domain.Interfaces.Repositories
 
         Task<Wine?> GetWithDetailsAsync(Guid uuid);
 
+        Task<List<Wine>> GetAllWithRatingsAsync();
+
         Task<List<string>> GetUniqueWineriesAsync();
 
         Task<List<Wine>> GetTopRatedAsync();
