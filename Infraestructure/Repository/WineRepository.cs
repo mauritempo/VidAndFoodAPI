@@ -125,6 +125,9 @@ namespace Infrastructure.Repository
         {
             return await _context.Set<Wine>()
                 .AsNoTracking()
+                .AsSplitQuery() // <--- IMPORTANTE: Ayuda cuando cargas múltiples colecciones (Grapes y Ratings)
+                .Include(w => w.Ratings)
+                    .ThenInclude(r => r.User)
                 .Include(w => w.WineGrapeVarieties)
                     .ThenInclude(gv => gv.Grape)
                 .FirstOrDefaultAsync(w => w.UuId == uuid);
