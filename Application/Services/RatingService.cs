@@ -54,7 +54,19 @@ namespace Application.Services
                 if (request.Score < 1 || request.Score > 5)
                     throw new ArgumentException("El puntaje debe estar entre 1 y 5.");
 
-                bool sommelier = IsBySommelier(role);
+
+                bool isBySommelier; // 1. Declarar afuera
+
+                if (role == Role.Admin || role == Role.Sommelier)
+                {
+                    isBySommelier = true;
+                }
+                else
+                {
+                    isBySommelier = false;
+                }
+
+            bool sommelier = IsBySommelier(role);
 
                 var existing = await _ratingRepository.GetByUserAndWineAsync(userUuId, wineUuId);
 
