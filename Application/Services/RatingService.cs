@@ -97,36 +97,61 @@ namespace Application.Services
                 
         
             public async Task DeleteRateAsync(Guid wineUuId)
-                {
-                    var userUuId = _currentUser.UserId;
-                    var role = _currentUser.Role;
+            {
+                var userUuId = _currentUser.UserId;
+                var role = _currentUser.Role;
 
-                    //if (role == Role.Admin)
-                    //{
-                    //    rating = await _ratingRepository.GetByWineAsync(wineUuId);
-                    //}
+                //if (role == Role.Admin)
+                //{
+                //    rating = await _ratingRepository.GetByWineAsync(wineUuId);
+                //}
 
-                    var existing = await _ratingRepository
-                        .GetByUserAndWineAsync(userUuId, wineUuId);
+                var existing = await _ratingRepository
+                    .GetByUserAndWineAsync(userUuId, wineUuId);
 
                     
 
-                    if (existing is not null)
-                    {
-                        existing.IsSommelier = false;
-                        existing.UpdatedAt = DateTime.UtcNow;
-                        existing.IsActive = false;
+                if (existing is not null)
+                {
+                    existing.IsSommelier = false;
+                    existing.UpdatedAt = DateTime.UtcNow;
+                    existing.IsActive = false;
 
-                        await _ratingRepository.UpdateAsync(existing);
-                    }
-                    else
-                    {
-                    throw new ArgumentException("No se pudo eliminar el Puntaje");
-                    }
+                    await _ratingRepository.UpdateAsync(existing);
                 }
+                else
+                {
+                throw new ArgumentException("No se pudo eliminar el Puntaje");
+                }
+            }
+        public async Task DeleteRateByAdmin(Guid ratingId)
+        {
+            // 1. Verificar el usuario actual
+            var role = _currentUser.Role;
+            if (role != Role.Admin)
+                throw new UnauthorizedAccessException("No tenés permisos.");
+
+            // 2. Buscar el rating
+            var rating = await _ratingRepository.GetByIdAsync(ratingId);
+
+            if (rating is not null)
+            {
+                rating.UpdatedAt = DateTime.UtcNow;
+                rating.IsActive = false;
+
+                await _ratingRepository.UpdateAsync(rating);
+            }
+            else
+            {
+                throw new ArgumentException("No se pudo eliminar el Puntaje");
+            }
+
+        }
 
 
-            private async Task UpdateWineStatistics(Guid wineId)
+
+
+        private async Task UpdateWineStatistics(Guid wineId)
             {
                 var (newAverage, newCount) = await _ratingRepository.GetWineStatsAsync(wineId);
 
