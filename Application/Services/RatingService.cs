@@ -149,6 +149,7 @@ namespace Application.Services
                     UserName = r.User?.FullName ?? "Anónimo", // Asumiendo que User tiene Name
                     Score = r.Score,
                     Review = r.Review,
+                    IsSommelierReview = r.IsSommelier,
                     CreatedAt = r.CreatedAt
                 }).ToList();
             }

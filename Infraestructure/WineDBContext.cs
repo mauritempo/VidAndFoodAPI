@@ -128,9 +128,9 @@ namespace Infrastructure
                     .WithMany()
                     .HasForeignKey(r => r.UserUuId);
                 b.HasOne(r => r.Wine)       // Un Rating tiene un Vino
-                            .WithMany(w => w.Ratings)    // Un Vino tiene muchos Ratings
-                            .HasForeignKey(r => r.WineUuId) // LA CLAVE ES ESTA: usá la columna que ya existe
-                            .HasPrincipalKey(w => w.UuId);
+                    .WithMany(w => w.Ratings)    // Un Vino tiene muchos Ratings
+                    .HasForeignKey(r => r.WineUuId) // LA CLAVE ES ESTA: usá la columna que ya existe
+                    .HasPrincipalKey(w => w.UuId);
             });
 
 

@@ -166,7 +166,7 @@ namespace Infrastructure.Repository
         public async Task<List<Wine>> GetAllWithRatingsAsync()
         {
             return await _context.Set<Wine>()
-                .Include(w => w.Ratings.Where(r => r.IsSommelier))
+                .Include(w => w.Ratings)
                     .ThenInclude(r => r.User) 
                 .Include(w => w.WineGrapeVarieties)
                     .ThenInclude(wg => wg.Grape)
