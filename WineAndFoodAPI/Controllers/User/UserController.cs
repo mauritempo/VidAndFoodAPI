@@ -48,8 +48,13 @@ namespace WineAndFoodAPI.Controllers.User
         {
             try
             {
-                await _service.UpgradeToSommelierAsync();
-                return Ok(new { message = "¡Felicidades! Tu cuenta ha sido actualizada a Sommelier." });
+                var newToken = await _service.UpgradeToSommelierAsync();
+
+                return Ok(new UpgradeDowngradeDto
+                {
+                    Message = "¡Felicidades! Tu cuenta ha sido actualizada a Sommelier.",
+                    Token = newToken
+                });
             }
             catch (KeyNotFoundException ex)
             {
