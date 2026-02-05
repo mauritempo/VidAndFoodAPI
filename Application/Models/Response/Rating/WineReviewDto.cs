@@ -14,6 +14,7 @@ namespace Application.Models.Response.Rating
         public string? Comment { get; set; }
         public string? Review { get; set; }
 
+        public Guid? UserId { get; set; }
         public bool IsSommelierReview { get; set; } 
         public DateTime CreatedAt { get; set; }
     }

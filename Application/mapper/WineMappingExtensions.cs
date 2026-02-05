@@ -123,6 +123,7 @@ namespace Application.mapper
                     {
                         Id = r.UuId,
                         UserName = r.User?.FullName ?? "Usuario Anónimo",
+                        UserId = r.UserUuId,
                         Score = r.Score,
                         Review = r.Review ?? string.Empty,
                         CreatedAt = r.UpdatedAt ?? r.CreatedAt,
