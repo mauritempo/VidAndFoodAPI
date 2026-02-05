@@ -23,7 +23,6 @@ namespace Domain.Entities
         public  Role RoleUser { get; set; } = Role.User;  
 
         public virtual ICollection<WineUser> WineUsers { get; set; } = new List<WineUser>();
-        public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
         public virtual ICollection<WineFavorite> Favorites { get; set; } = new List<WineFavorite>();
     
 }

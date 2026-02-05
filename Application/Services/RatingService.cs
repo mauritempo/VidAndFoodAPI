@@ -6,68 +6,152 @@ using Domain.Entities.Enums;
 using Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
 {
-        public class RatingService : IRatingService
+    public class RatingService : IRatingService
     {
-            private readonly IRatingRepository _ratingRepository;
-            private readonly IWineRepository _wineRepository;
-            private readonly ICurrentUser _currentUser;
+        private readonly IRatingRepository _ratingRepository;
+        private readonly IWineRepository _wineRepository;
+        private readonly ICurrentUser _currentUser;
+        private readonly IUserRepository _userRepository;
 
-            public RatingService(IRatingRepository ratingRepository, IWineRepository wineRepository, ICurrentUser currentUser)
-                {
-                    _ratingRepository = ratingRepository;
-                    _wineRepository = wineRepository;
-                    _currentUser = currentUser;
+
+            public RatingService(IRatingRepository ratingRepository, IWineRepository wineRepository, ICurrentUser currentUser, IUserRepository userRepository)
+            {
+                _ratingRepository = ratingRepository;
+                _wineRepository = wineRepository;
+                _currentUser = currentUser;
+                _userRepository = userRepository;
             }
 
-            public async Task RateWineAsync(RateWineRequest request)
+            private static bool IsBySommelier(Role role) =>
+                role == Role.Admin || role == Role.Sommelier;
+
+            public async Task RateWineAsync(Guid wineUuId, RateWineRequest request)
             {
-                var userId = _currentUser.UserId;
-                var userRole = _currentUser.Role;
+                var userUuId = _currentUser.UserId;
+                var role = _currentUser.Role;
+
+                if (userUuId == Guid.Empty)
+                {
+                    throw new UnauthorizedAccessException("No se pudo identificar al usuario desde el token.");
+                }
+
+                var userExists = await _userRepository.GetByIdAsync(userUuId);
+
+                if (userExists is null)
+                {
+                    throw new KeyNotFoundException($"El usuario con ID {userUuId} no existe en la base de datos.");
+                }
 
                 if (request.Score < 1 || request.Score > 5)
                     throw new ArgumentException("El puntaje debe estar entre 1 y 5.");
+                if (request.Score < 1 || request.Score > 5)
+                    throw new ArgumentException("El puntaje debe estar entre 1 y 5.");
 
-                bool isRatingPublic = (userRole == Role.Sommelier);
 
-                var existingRating = await _ratingRepository.GetByUserAndWineAsync(userId, request.WineId);
+                bool isBySommelier; // 1. Declarar afuera
 
-                if (existingRating != null)
+                if (role == Role.Admin || role == Role.Sommelier)
                 {
-                    existingRating.Score = request.Score;
-                    existingRating.Review = request.Review;
-                    existingRating.CreatedAt = DateTime.UtcNow;
-                    existingRating.IsPublic = isRatingPublic;
-
-                    await _ratingRepository.UpdateAsync(existingRating);
+                    isBySommelier = true;
                 }
                 else
                 {
-                    var newRating = new Rating
+                    isBySommelier = false;
+                }
+
+                bool sommelier = IsBySommelier(role);
+
+                var existing = await _ratingRepository.GetByUserAndWineAsync(userUuId, wineUuId);
+
+                if (existing is not null)
+                {
+                    existing.Score = request.Score;
+                    existing.Review = request.Review;
+                    existing.IsSommelier = sommelier;
+                    existing.UpdatedAt = DateTime.UtcNow;
+                    await _ratingRepository.UpdateAsync(existing);
+                }
+                else
+                {
+                    var rating = new Rating
                     {
-                        UserId = userId,
-                        WineId = request.WineId,
+                        UserUuId = userUuId, // Aquí es donde fallaba si userUuId no era válido
+                        WineUuId = wineUuId,
                         Score = request.Score,
                         Review = request.Review,
-                        CreatedAt = DateTime.UtcNow,
-
-                        IsPublic = isRatingPublic
+                        IsSommelier = sommelier,
+                        CreatedAt = DateTime.UtcNow
                     };
 
-                    await _ratingRepository.AddAsync(newRating);
+                    await _ratingRepository.AddAsync(rating);
                 }
-                if (isRatingPublic)
+                await UpdateWineStatistics(wineUuId);
+            }
+                
+        
+            public async Task DeleteRateAsync(Guid wineUuId)
+            {
+                var userUuId = _currentUser.UserId;
+                var role = _currentUser.Role;
+
+                //if (role == Role.Admin)
+                //{
+                //    rating = await _ratingRepository.GetByWineAsync(wineUuId);
+                //}
+
+                var existing = await _ratingRepository
+                    .GetByUserAndWineAsync(userUuId, wineUuId);
+
+                    
+
+                if (existing is not null)
                 {
-                    await UpdateWineStatistics(request.WineId);
+                    existing.IsSommelier = false;
+                    existing.UpdatedAt = DateTime.UtcNow;
+                    existing.IsActive = false;
+
+                    await _ratingRepository.UpdateAsync(existing);
+                }
+                else
+                {
+                throw new ArgumentException("No se pudo eliminar el Puntaje");
                 }
             }
+        public async Task DeleteRateByAdmin(Guid ratingId)
+        {
+            // 1. Verificar el usuario actual
+            var role = _currentUser.Role;
+            if (role != Role.Admin)
+                throw new UnauthorizedAccessException("No tenés permisos.");
 
-            private async Task UpdateWineStatistics(Guid wineId)
+            // 2. Buscar el rating
+            var rating = await _ratingRepository.GetByIdAsync(ratingId);
+
+            if (rating is not null)
+            {
+                rating.UpdatedAt = DateTime.UtcNow;
+                rating.IsActive = false;
+
+                await _ratingRepository.UpdateAsync(rating);
+            }
+            else
+            {
+                throw new ArgumentException("No se pudo eliminar el Puntaje");
+            }
+
+        }
+
+
+
+
+        private async Task UpdateWineStatistics(Guid wineId)
             {
                 var (newAverage, newCount) = await _ratingRepository.GetWineStatsAsync(wineId);
 
@@ -84,14 +168,13 @@ namespace Application.Services
             public async Task<List<WineReviewDto>> GetWineReviews(Guid wineId)
             {
                 var reviews = await _ratingRepository.GetReviewsByWineAsync(wineId);
-
-
                 return reviews.Select(r => new WineReviewDto
                 {
                     Id = r.UuId,
                     UserName = r.User?.FullName ?? "Anónimo", // Asumiendo que User tiene Name
                     Score = r.Score,
                     Review = r.Review,
+                    IsSommelierReview = r.IsSommelier,
                     CreatedAt = r.CreatedAt
                 }).ToList();
             }
@@ -101,5 +184,6 @@ namespace Application.Services
                 return UpdateWineStatistics(wineId);
             }
     }
-    }
+}
+
 

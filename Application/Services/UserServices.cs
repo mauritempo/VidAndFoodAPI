@@ -14,15 +14,18 @@ namespace Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher<User> _hasher;
         private readonly ICurrentUser _current;
+        private readonly IAuthentication _authentication;
 
         public UserServices(
             IUserRepository userRepository,
             IPasswordHasher<User> hasher,
-            ICurrentUser current)
+            ICurrentUser current,
+            IAuthentication authentication)
         {
             _userRepository = userRepository;
             _hasher = hasher;
             _current = current;
+            _authentication = authentication;
         }
 
         public async Task<List<UserProfileDto>> GetAllUsersAsync()
@@ -68,7 +71,7 @@ namespace Application.Services
             };
         }
 
-        public async Task UpgradeToSommelierAsync()
+        public async Task<string> UpgradeToSommelierAsync()
         {
             var userId = _current.UserId;
 
@@ -86,19 +89,14 @@ namespace Application.Services
                 throw new InvalidOperationException("¡Ya eres un Sommelier!");
             }
 
-            if (user.RoleUser == Role.Admin)
-            {
-                throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
-            }
-
-            // 4. Aplicamos el cambio ÚNICO permitido
             user.RoleUser = Role.Sommelier;
-
-            // 5. Guardamos
             await _userRepository.UpdateAsync(user);
+
+            return _authentication.GenerateToken(user);
+
         }
 
-        public async Task DownGradeToUserAsync()
+        public async Task<string> DownGradeToUserAsync()
         {
             var userId = _current.UserId;
             var user = await _userRepository.GetByIdAsync(userId);
@@ -107,13 +105,15 @@ namespace Application.Services
             {
                 throw new KeyNotFoundException("Usuario no encontrado.");
             }
-            if (user.RoleUser == Role.Admin)
-            {
-                throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
-            }
+            //if (user.RoleUser == Role.Admin)
+            //{
+            //    throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
+            //}
 
             user.RoleUser = Role.User;
             await _userRepository.UpdateAsync(user);
+
+            return _authentication.GenerateToken(user);
         }
 
         public async Task DeleteUserAsync(Guid id)
@@ -137,6 +137,30 @@ namespace Application.Services
             }
             await _userRepository.DeleteAsync(user);
         }
+
+        public async Task ChangeRoleAsync(Guid userUuId, Role newRole)
+        {
+            if (_current.Role != Role.Admin)
+            {
+                throw new UnauthorizedAccessException("Acceso denegado. Solo administradores pueden cambiar roles.");
+            }
+
+            var user = await _userRepository.GetByIdAsync(userUuId);
+            if (user is null)
+                throw new KeyNotFoundException("Usuario no encontrado.");
+
+            if (user.RoleUser == newRole)
+                throw new InvalidOperationException("El usuario ya tiene ese rol.");
+
+            if (user.UuId == _current.UserId && newRole != Role.Admin)
+                throw new InvalidOperationException("No podés cambiar tu propio rol de administrador.");
+
+            user.RoleUser = newRole;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user);
+        }
+
 
         public async Task<UserDto?> GetByEmailAsync(string email)
         {

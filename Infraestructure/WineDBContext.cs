@@ -118,37 +118,22 @@ namespace Infrastructure
             modelBuilder.Entity<Rating>(b =>
             {
                 b.HasKey(x => x.UuId);
-                b.HasIndex(x => new { x.UserId, x.WineId }).IsUnique();
 
-                b.Property(x => x.Score)
-                    .IsRequired()
-                    .HasColumnName("score");
-
-                b.Property(x => x.Review)
-                    .HasMaxLength(2000)
-                    .IsRequired(false);
-
-                b.Property(x => x.IsPublic)
-                    .HasDefaultValue(true);
-
-                // Constraint de score 1..5
-                b.ToTable(t => t.HasCheckConstraint(
-                    "CK_Rating_Score",
-                    "score >= 1 AND score <= 5"
-                ));
+                
+                b.HasIndex(x => new { x.UserUuId, x.WineUuId, x.IsSommelier })
+                    .IsUnique()
+                    .HasFilter("\"IsActive\" = true");
 
                 b.HasOne(r => r.User)
                     .WithMany()
-                    .HasForeignKey(r => r.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                b.HasOne(r => r.Wine)
-                    .WithMany()
-                    .HasForeignKey(r => r.WineId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .HasForeignKey(r => r.UserUuId);
+                b.HasOne(r => r.Wine)       // Un Rating tiene un Vino
+                    .WithMany(w => w.Ratings)    // Un Vino tiene muchos Ratings
+                    .HasForeignKey(r => r.WineUuId) // LA CLAVE ES ESTA: usá la columna que ya existe
+                    .HasPrincipalKey(w => w.UuId);
             });
 
-            // WINE USER (HISTORIAL DEL USUARIO CON EL VINO)
+
             modelBuilder.Entity<WineUser>(b =>
             {
                 b.HasKey(x => x.UuId);

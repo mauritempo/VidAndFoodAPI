@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(WineDBContext))]
-    [Migration("20251202233847_migrationV1")]
-    partial class migrationV1
+    [Migration("20260124162122_Initial-migration-post-changes")]
+    partial class Initialmigrationpostchanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -101,9 +101,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsPublic")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Review")
                         .HasMaxLength(2000)
@@ -115,33 +113,20 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("UserUuId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("UserUuId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("WineId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("WineUuId")
+                    b.Property<Guid>("WineUuId")
                         .HasColumnType("uuid");
 
                     b.HasKey("UuId");
 
-                    b.HasIndex("UserUuId");
-
-                    b.HasIndex("WineId");
-
                     b.HasIndex("WineUuId");
 
-                    b.HasIndex("UserId", "WineId")
+                    b.HasIndex("UserUuId", "WineUuId")
                         .IsUnique();
 
-                    b.ToTable("Ratings", t =>
-                        {
-                            t.HasCheckConstraint("CK_Rating_Score", "\"Score\" >= 1 AND \"Score\" <= 5");
-                        });
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -223,7 +208,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasColumnType("numeric");
 
                     b.Property<int>("RatingCount")
@@ -298,7 +283,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<int?>("Percentage")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("percentage");
 
                     b.HasKey("WineId", "GrapeId");
 
@@ -306,7 +292,7 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("WineGrapeVarieties", t =>
                         {
-                            t.HasCheckConstraint("CK_WineGrapeVariety_Percentage", "(\"Percentage\" IS NULL) OR (\"Percentage\" >= 0 AND \"Percentage\" <= 100)");
+                            t.HasCheckConstraint("CK_WineGrapeVariety_Percentage", "percentage IS NULL OR (percentage >= 0 AND percentage <= 100)");
                         });
                 });
 
@@ -369,7 +355,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("DateAdded")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -379,12 +365,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<decimal?>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<int>("Quantity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(1);
+                        .HasDefaultValue(1)
+                        .HasColumnName("quantity");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -401,7 +388,7 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("WineUserCellarItems", t =>
                         {
-                            t.HasCheckConstraint("CK_CellarItem_Quantity", "\"Quantity\" > 0");
+                            t.HasCheckConstraint("CK_CellarItem_Quantity", "quantity > 0");
                         });
                 });
 
@@ -420,23 +407,15 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserUuId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("UserUuId");
 
                     b.HasOne("Domain.Entities.Wine", "Wine")
                         .WithMany()
-                        .HasForeignKey("WineId")
+                        .HasForeignKey("WineUuId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.Wine", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("WineUuId");
 
                     b.Navigation("User");
 
@@ -533,8 +512,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Favorites");
 
-                    b.Navigation("Ratings");
-
                     b.Navigation("WineUsers");
                 });
 
@@ -543,8 +520,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("CellarItems");
 
                     b.Navigation("FavoritedByUsers");
-
-                    b.Navigation("Ratings");
 
                     b.Navigation("WineGrapeVarieties");
                 });

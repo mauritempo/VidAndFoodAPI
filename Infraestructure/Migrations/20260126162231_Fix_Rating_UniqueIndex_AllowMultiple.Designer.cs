@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(WineDBContext))]
-    [Migration("20251203164718_Initial-Migration")]
-    partial class InitialMigration
+    [Migration("20260126162231_Fix_Rating_UniqueIndex_AllowMultiple")]
+    partial class Fix_Rating_UniqueIndex_AllowMultiple
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -101,48 +101,33 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsPublic")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Review")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
                     b.Property<int>("Score")
-                        .HasColumnType("integer")
-                        .HasColumnName("score");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("UserUuId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("UserUuId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("WineId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("WineUuId")
+                    b.Property<Guid>("WineUuId")
                         .HasColumnType("uuid");
 
                     b.HasKey("UuId");
 
-                    b.HasIndex("UserUuId");
-
-                    b.HasIndex("WineId");
-
                     b.HasIndex("WineUuId");
 
-                    b.HasIndex("UserId", "WineId")
-                        .IsUnique();
+                    b.HasIndex("UserUuId", "WineUuId", "IsActive")
+                        .IsUnique()
+                        .HasFilter("\"IsActive\" = true");
 
-                    b.ToTable("Ratings", t =>
-                        {
-                            t.HasCheckConstraint("CK_Rating_Score", "score >= 1 AND score <= 5");
-                        });
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -224,7 +209,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasColumnType("numeric");
 
                     b.Property<int>("RatingCount")
@@ -423,23 +408,15 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserUuId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("UserUuId");
 
                     b.HasOne("Domain.Entities.Wine", "Wine")
                         .WithMany()
-                        .HasForeignKey("WineId")
+                        .HasForeignKey("WineUuId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.Wine", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("WineUuId");
 
                     b.Navigation("User");
 
@@ -536,8 +513,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Favorites");
 
-                    b.Navigation("Ratings");
-
                     b.Navigation("WineUsers");
                 });
 
@@ -546,8 +521,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("CellarItems");
 
                     b.Navigation("FavoritedByUsers");
-
-                    b.Navigation("Ratings");
 
                     b.Navigation("WineGrapeVarieties");
                 });

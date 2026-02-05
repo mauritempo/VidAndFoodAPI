@@ -8,12 +8,13 @@ using Infrastructure.Options;
 using Infrastructure.Repository;
 using Infrastructure.Security;
 using Infrastructure.Services;
-using Infrastructure.Services.Resilience;
+using Infrastructure.Services.Resilience; // Para encontrar la clase ApiClientConfiguration
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
@@ -22,12 +23,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 #region Database
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+string connectionString = builder.Configuration.GetConnectionString("WineAndFoodDBConnectionString");
 
 builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure")));
 #endregion
 
-
+Console.WriteLine("ConnectionString: " + connectionString);
 
 #region Options (bind seguro)
 var geminiSection = builder.Configuration.GetSection(GeminiOptions.SectionName);
@@ -71,8 +72,8 @@ builder.Services.AddHttpClient("geminiHttpClient")
         client.BaseAddress = new Uri(opts.BaseUrl);
         
     })
-    .AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy(geminiApiRelisienceConfig))
-    .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(geminiApiRelisienceConfig));
+    .AddPolicyHandler(Infrastructure.PollyResiliencePolicies.GetRetryPolicy(geminiApiRelisienceConfig))
+    .AddPolicyHandler(Infrastructure.PollyResiliencePolicies.GetCircuitBreakerPolicy(geminiApiRelisienceConfig));
 #endregion
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -123,7 +124,29 @@ builder.Services.AddScoped<IGrapeService, GrapeService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(setupAction =>
+{
+    setupAction.CustomSchemaIds(type => type.FullName);
+    setupAction.AddSecurityDefinition("VidAndFoodAPIBearerAuth", new OpenApiSecurityScheme() //Esto va a permitir usar swagger con el token.
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        Description = "Ac� pegar el token generado al loguearse."
+    });
+
+    setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "VidAndFoodAPIBearerAuth" 
+                } //Tiene que coincidir con el id seteado arriba en la definici�n
+                }, new List<string>() }
+    });
+});
 builder.Configuration.AddEnvironmentVariables();
 
 
@@ -170,6 +193,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

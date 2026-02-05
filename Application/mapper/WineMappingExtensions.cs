@@ -1,5 +1,6 @@
 ﻿using Application.Models.Request.Wines;
 using Application.Models.Response;
+using Application.Models.Response.Rating;
 using Application.Models.Response.Wines;
 using Domain.Entities;
 using Domain.Model.Shared;
@@ -43,6 +44,8 @@ namespace Application.mapper
                 RegionName = entity.RegionName,
                 VintageYear = entity.VintageYear,
                 Price = entity.Price,
+                NotesTaste = entity.TastingNotes ?? "",
+                Aroma = entity.Aroma ?? "",
                 ImageUrl = entity.LabelImageUrl,
                 AverageScore = entity.AverageScore,
                 IsActive = entity.IsActive,
@@ -52,7 +55,8 @@ namespace Application.mapper
                 {
                     Id = g.GrapeId,
                     Name = g.Grape?.Name ?? "Sin nombre"
-                }).ToList() ?? new List<GrapeResponseDto>() 
+                }).ToList() ?? new List<GrapeResponseDto>(),
+
             };
 
         }
@@ -74,7 +78,18 @@ namespace Application.mapper
                 IsWineDiscontinued = !entity.IsActive,
                 IsActive = entity.IsActive,
                 CreatedAt = entity.CreatedAt,
-                UpdatedAt = entity.UpdatedAt
+
+                Reviews = entity.Ratings?
+                .Select(r => new WineReviewDto
+                {
+                    UserName = r.User.FullName,
+                    Score = r.Score,
+                    Review = r.Review,
+                    CreatedAt = r.UpdatedAt ?? r.CreatedAt,
+                    IsSommelierReview = r.IsSommelier // Usamos el campo de la entidad Rating
+                }).OrderByDescending(r => r.IsSommelierReview) // Opcional: Sommeliers arriba
+                  .ThenByDescending(r => r.CreatedAt)
+                .ToList() ?? new List<WineReviewDto>()
             };
         }
 

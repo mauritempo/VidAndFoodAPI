@@ -25,6 +25,13 @@ namespace Infrastructure.Repository
                         .FirstOrDefaultAsync(h => h.UserId == userId && h.WineId == wineId);
          }
 
+        public async Task<int> CountHistoryAsync(Guid userId)
+        {
+            return await _context.Set<WineUser>()
+                .AsNoTracking()
+                .CountAsync(h => h.UserId == userId);
+        }
+
 
 
         public async Task<List<WineUser>> GetAllHistoryAsync(Guid userId)

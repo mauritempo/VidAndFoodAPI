@@ -11,7 +11,7 @@ namespace WineAndFoodAPI.Controllers.GrapeController
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class GrapeController : ControllerBase
     {
         private readonly IGrapeService _grapeService;
@@ -73,9 +73,9 @@ namespace WineAndFoodAPI.Controllers.GrapeController
             {
                 return StatusCode(403, new { message = ex.Message });
             }
-            catch (InvalidOperationException ex) // Para duplicados de nombre
+            catch (InvalidOperationException ex) 
             {
-                return Conflict(new { message = ex.Message }); // 409 Conflict es ideal para duplicados
+                return Conflict(new { message = ex.Message }); 
             }
             catch (Exception ex)
             {
