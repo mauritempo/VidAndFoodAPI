@@ -206,30 +206,7 @@ namespace Application.Services
         public async Task<List<WineListItemDto>> GetAllWines()
         {
             var wines = await _wineRepository.GetAllWithRatingsAsync();
-
-            return wines.Select(w => new WineListItemDto
-            {
-                Id = w.UuId,
-                Name = w.Name,
-                WineryName = w.WineryName,
-                Price = w.Price,
-                VintageYear = w.VintageYear,
-                ImageUrl = w.LabelImageUrl,
-                Aroma = w.Aroma,
-                NotesTaste = w.TastingNotes,
-                AverageScore = w.AverageScore,
-                GrapeNames = string.Join(", ", w.WineGrapeVarieties.Select(gv => gv.Grape.Name)),
-
-                Reviews = w.Ratings.Select(r => new WineReviewDto
-                {
-                    Id = r.UuId,
-                    UserName = r.User?.FullName ?? "Anónimo",
-                    Score = r.Score,
-                    Review = r.Review,
-                    IsSommelierReview = r.IsSommelier,
-                    CreatedAt = r.CreatedAt
-                }).ToList()
-            }).ToList();
+            return wines.Select(w => w.ToListItemDto()).ToList();
         }
 
         public async Task<List<WineListItemDto>> GetWineOfTheMonth()
