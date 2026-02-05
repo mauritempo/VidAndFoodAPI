@@ -14,8 +14,8 @@ namespace Application.Models.Response.Wines
         public string WineryName { get; set; } = string.Empty;
         public string RegionName { get; set; } = string.Empty;
 
-        public string NotesTaste { get; set; } = string.Empty;
-        public string Aroma { get; set; } = string.Empty;
+        public string? NotesTaste { get; set; } = string.Empty;
+        public string? Aroma { get; set; } = string.Empty;
         public decimal? Price { get; set; }
         public int VintageYear { get; set; }
         public string? ImageUrl { get; set; }
