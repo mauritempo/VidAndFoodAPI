@@ -23,7 +23,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 #region Database
-string connectionString = builder.Configuration.GetConnectionString("WineAndFoodDBConnectionString");
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure")));
 #endregion

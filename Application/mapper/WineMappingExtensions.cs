@@ -103,13 +103,34 @@ namespace Application.mapper
                 Id = entity.UuId,
                 Name = entity.Name,
                 WineryName = entity.WineryName,
+                RegionName = entity.RegionName,
                 Price = entity.Price,
                 VintageYear = entity.VintageYear,
-                AverageScore = entity.AverageScore,
                 ImageUrl = entity.LabelImageUrl,
-                GrapeNames = entity.WineGrapeVarieties != null && entity.WineGrapeVarieties.Any()
-                    ? string.Join(", ", entity.WineGrapeVarieties.Select(g => g.Grape?.Name))
-                    : "Blend"
+                AverageScore = entity.AverageScore,
+                Aroma = entity.Aroma,
+                NotesTaste = entity.TastingNotes,
+
+                GrapeNames = string.Join(", ", entity.WineGrapeVarieties?
+                    .Where(wg => wg?.Grape != null)
+                    .Select(wg => wg.Grape.Name) ?? Array.Empty<string>()),
+
+                IsWineDiscontinued = !entity.IsActive,
+
+                Reviews = entity.Ratings?
+                    .Where(r => r != null) 
+                    .Select(r => new WineReviewDto
+                    {
+                        Id = r.UuId,
+                        UserName = r.User?.FullName ?? "Usuario Anónimo",
+                        Score = r.Score,
+                        Review = r.Review ?? string.Empty,
+                        CreatedAt = r.UpdatedAt ?? r.CreatedAt,
+                        IsSommelierReview = r.IsSommelier
+                    })
+                    .OrderByDescending(r => r.IsSommelierReview)
+                    .ThenByDescending(r => r.CreatedAt)
+                    .ToList() ?? new List<WineReviewDto>()
             };
         }
     }

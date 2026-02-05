@@ -39,10 +39,13 @@ namespace Infrastructure.Repository
             return await _context.Set<WineUser>()
                 .AsNoTracking()
                 .Where(h => h.UserId == userId)
-                .Include(h => h.Wine) 
-                    .ThenInclude(w => w.WineGrapeVarieties) 
+                .Include(h => h.Wine)
+                    .ThenInclude(w => w.Ratings)
+                .Include(h => h.Wine)
+                    .ThenInclude(w => w.WineGrapeVarieties)
                         .ThenInclude(wg => wg.Grape)
-                .OrderByDescending(h => h.LastConsumedAt ?? h.CreatedAt) 
+                .AsSplitQuery()
+                .OrderByDescending(h => h.LastConsumedAt ?? h.CreatedAt)
                 .ToListAsync();
         }
         public async Task<int> GetCountByUserAsync(Guid userId)
