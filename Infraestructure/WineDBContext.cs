@@ -119,15 +119,18 @@ namespace Infrastructure
             {
                 b.HasKey(x => x.UuId);
 
-                b.HasIndex(x => new { x.UserUuId, x.WineUuId }).IsUnique();
+                
+                b.HasIndex(x => new { x.UserUuId, x.WineUuId, x.IsSommelier })
+                    .IsUnique()
+                    .HasFilter("\"IsActive\" = true");
 
                 b.HasOne(r => r.User)
                     .WithMany()
                     .HasForeignKey(r => r.UserUuId);
-
-                b.HasOne(r => r.Wine)
-                    .WithMany()
-                    .HasForeignKey(r => r.WineUuId);
+                b.HasOne(r => r.Wine)       // Un Rating tiene un Vino
+                    .WithMany(w => w.Ratings)    // Un Vino tiene muchos Ratings
+                    .HasForeignKey(r => r.WineUuId) // LA CLAVE ES ESTA: usá la columna que ya existe
+                    .HasPrincipalKey(w => w.UuId);
             });
 
 

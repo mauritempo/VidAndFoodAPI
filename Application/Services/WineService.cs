@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Application.mapper;
 using Application.Models.Request.Wines;
+using Application.Models.Response.Rating;
 using Application.Models.Response.Wines;
 using Domain.Entities;
 using Domain.Entities.Enums;
@@ -66,7 +67,7 @@ namespace Application.Services
 
             if (wine == null)
                 throw new KeyNotFoundException($"No se encontró el vino con ID {id}");
-
+            
             wine.Name = request.Name;
             wine.Price = request.Price;
             wine.VintageYear = request.VintageYear;
@@ -194,13 +195,20 @@ namespace Application.Services
             }
         }
 
+        //public async Task<List<WineListItemDto>> GetAllWines()
+        //{
+        //    var wines = await _wineRepository.GetAllWithRatingsAsync();
+
+        //    // Mapeamos a DTO
+        //    return wines.Select(w => w.ToListItemDto()).ToList();
+        //}
+        // WineService.cs
         public async Task<List<WineListItemDto>> GetAllWines()
         {
-            var wines = await _wineRepository.GetAll();
-
-            // Mapeamos a DTO
+            var wines = await _wineRepository.GetAllWithRatingsAsync();
             return wines.Select(w => w.ToListItemDto()).ToList();
         }
+
         public async Task<List<WineListItemDto>> GetWineOfTheMonth()
         {
             var wines = await _wineRepository.GetTopRatedAsync();

@@ -1,5 +1,6 @@
 ﻿using Application.Models.Request.Wines;
 using Application.Models.Response;
+using Application.Models.Response.Rating;
 using Application.Models.Response.Wines;
 using Domain.Entities;
 using Domain.Model.Shared;
@@ -43,16 +44,18 @@ namespace Application.mapper
                 RegionName = entity.RegionName,
                 VintageYear = entity.VintageYear,
                 Price = entity.Price,
+                NotesTaste = entity.TastingNotes ?? "",
+                Aroma = entity.Aroma ?? "",
                 ImageUrl = entity.LabelImageUrl,
                 AverageScore = entity.AverageScore,
                 IsActive = entity.IsActive,
-                IsWineDiscontinued = !entity.IsActive,
                 // Mapeo de la lista de uvas
                 Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
                 {
                     Id = g.GrapeId,
                     Name = g.Grape?.Name ?? "Sin nombre"
-                }).ToList() ?? new List<GrapeResponseDto>() 
+                }).ToList() ?? new List<GrapeResponseDto>(),
+
             };
 
         }
@@ -70,11 +73,26 @@ namespace Application.mapper
                 ImageUrl = entity.LabelImageUrl,
                 AverageScore = entity.AverageScore,
                 // Concatenamos las uvas para mostrar algo rápido en la tabla
-                GrapeNames = string.Join(", ", entity.WineGrapeVarieties.Select(wg => wg.Grape.Name)),
-                IsWineDiscontinued = !entity.IsActive,
-                IsActive = entity.IsActive,
+                Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
+                {
+                    Id = g.GrapeId,
+                    Name = g.Grape?.Name ?? "Sin nombre"
+                }).ToList() ?? new List<GrapeResponseDto>(),
+
+                IsActive = !entity.IsActive,
                 CreatedAt = entity.CreatedAt,
-                UpdatedAt = entity.UpdatedAt
+
+                Reviews = entity.Ratings?
+                .Select(r => new WineReviewDto
+                {
+                    UserName = r.User.FullName,
+                    Score = r.Score,
+                    Review = r.Review,
+                    CreatedAt = r.UpdatedAt ?? r.CreatedAt,
+                    IsSommelierReview = r.IsSommelier // Usamos el campo de la entidad Rating
+                }).OrderByDescending(r => r.IsSommelierReview) // Opcional: Sommeliers arriba
+                  .ThenByDescending(r => r.CreatedAt)
+                .ToList() ?? new List<WineReviewDto>()
             };
         }
 
@@ -88,13 +106,38 @@ namespace Application.mapper
                 Id = entity.UuId,
                 Name = entity.Name,
                 WineryName = entity.WineryName,
+                RegionName = entity.RegionName,
                 Price = entity.Price,
                 VintageYear = entity.VintageYear,
-                AverageScore = entity.AverageScore,
                 ImageUrl = entity.LabelImageUrl,
-                GrapeNames = entity.WineGrapeVarieties != null && entity.WineGrapeVarieties.Any()
-                    ? string.Join(", ", entity.WineGrapeVarieties.Select(g => g.Grape?.Name))
-                    : "Blend"
+                AverageScore = entity.AverageScore,
+                Aroma = entity.Aroma,
+                NotesTaste = entity.TastingNotes,
+
+                Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
+                {
+                    Id = g.GrapeId,
+                    Name = g.Grape?.Name ?? "Sin nombre"
+                }).ToList() ?? new List<GrapeResponseDto>(),
+
+                IsActive = !entity.IsActive,
+
+                Reviews = entity.Ratings?
+                    .Where(r => r != null) 
+                    .Select(r => new WineReviewDto
+                    {
+                        Id = r.UuId,
+                        UserName = r.User?.FullName ?? "Usuario Anónimo",
+                        UserId = r.UserUuId,
+                        Score = r.Score,
+                        Review = r.Review ?? string.Empty,
+                        CreatedAt = r.UpdatedAt ?? r.CreatedAt,
+                        IsSommelierReview = r.IsSommelier,
+                        IsActive = r.IsActive
+                    })
+                    .OrderByDescending(r => r.IsSommelierReview)
+                    .ThenByDescending(r => r.CreatedAt)
+                    .ToList() ?? new List<WineReviewDto>()
             };
         }
     }

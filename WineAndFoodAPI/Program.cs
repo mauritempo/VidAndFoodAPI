@@ -8,7 +8,7 @@ using Infrastructure.Options;
 using Infrastructure.Repository;
 using Infrastructure.Security;
 using Infrastructure.Services;
-using Infrastructure.Services.Resilience;
+using Infrastructure.Services.Resilience; // Para encontrar la clase ApiClientConfiguration
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 #region Database
-string connectionString = builder.Configuration.GetConnectionString("WineAndFoodDBConnectionString");
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<WineDBContext>(dbContextOptions => dbContextOptions.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure")));
 #endregion
@@ -72,8 +72,8 @@ builder.Services.AddHttpClient("geminiHttpClient")
         client.BaseAddress = new Uri(opts.BaseUrl);
         
     })
-    .AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy(geminiApiRelisienceConfig))
-    .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(geminiApiRelisienceConfig));
+    .AddPolicyHandler(Infrastructure.PollyResiliencePolicies.GetRetryPolicy(geminiApiRelisienceConfig))
+    .AddPolicyHandler(Infrastructure.PollyResiliencePolicies.GetCircuitBreakerPolicy(geminiApiRelisienceConfig));
 #endregion
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -126,11 +126,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setupAction =>
 {
+    setupAction.CustomSchemaIds(type => type.FullName);
     setupAction.AddSecurityDefinition("VidAndFoodAPIBearerAuth", new OpenApiSecurityScheme() //Esto va a permitir usar swagger con el token.
     {
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
-        Description = "Acá pegar el token generado al loguearse."
+        Description = "Acï¿½ pegar el token generado al loguearse."
     });
 
     setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -142,7 +143,7 @@ builder.Services.AddSwaggerGen(setupAction =>
                 {
                     Type = ReferenceType.SecurityScheme,
                     Id = "VidAndFoodAPIBearerAuth" 
-                } //Tiene que coincidir con el id seteado arriba en la definición
+                } //Tiene que coincidir con el id seteado arriba en la definiciï¿½n
                 }, new List<string>() }
     });
 });

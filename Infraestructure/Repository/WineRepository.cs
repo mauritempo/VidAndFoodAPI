@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.Models.Response.Rating;
+using Application.Models.Response.Wines;
+using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Model.Enums.Wines.Criteria;
 using Infrastructure.Repository.common;
@@ -123,6 +125,9 @@ namespace Infrastructure.Repository
         {
             return await _context.Set<Wine>()
                 .AsNoTracking()
+                .AsSplitQuery() // <--- IMPORTANTE: Ayuda cuando cargas múltiples colecciones (Grapes y Ratings)
+                .Include(w => w.Ratings)
+                    .ThenInclude(r => r.User)
                 .Include(w => w.WineGrapeVarieties)
                     .ThenInclude(gv => gv.Grape)
                 .FirstOrDefaultAsync(w => w.UuId == uuid);
@@ -154,6 +159,19 @@ namespace Infrastructure.Repository
                 .OrderByDescending(w => w.UpdatedAt ?? w.CreatedAt)
                 .Include(w => w.WineGrapeVarieties)
                     .ThenInclude(gv => gv.Grape)
+                .ToListAsync();
+        }
+
+        // WineRepository.cs (Infrastructure)
+        public async Task<List<Wine>> GetAllWithRatingsAsync()
+        {
+            return await _context.Set<Wine>()
+                .Include(w => w.Ratings)
+                    .ThenInclude(r => r.User) 
+                .Include(w => w.WineGrapeVarieties)
+                    .ThenInclude(wg => wg.Grape)
+                    .AsSplitQuery()
+                .Where(w => w.IsActive == true)
                 .ToListAsync();
         }
 

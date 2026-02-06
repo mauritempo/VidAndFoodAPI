@@ -14,15 +14,18 @@ namespace Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher<User> _hasher;
         private readonly ICurrentUser _current;
+        private readonly IAuthentication _authentication;
 
         public UserServices(
             IUserRepository userRepository,
             IPasswordHasher<User> hasher,
-            ICurrentUser current)
+            ICurrentUser current,
+            IAuthentication authentication)
         {
             _userRepository = userRepository;
             _hasher = hasher;
             _current = current;
+            _authentication = authentication;
         }
 
         public async Task<List<UserProfileDto>> GetAllUsersAsync()
@@ -68,7 +71,7 @@ namespace Application.Services
             };
         }
 
-        public async Task UpgradeToSommelierAsync()
+        public async Task<string> UpgradeToSommelierAsync()
         {
             var userId = _current.UserId;
 
@@ -86,19 +89,14 @@ namespace Application.Services
                 throw new InvalidOperationException("¡Ya eres un Sommelier!");
             }
 
-            //if (user.RoleUser == Role.Admin)
-            //{
-            //    throw new InvalidOperationException("Un administrador no puede cambiar su rol a Sommelier por esta vía.");
-            //}
-
-            // 4. Aplicamos el cambio ÚNICO permitido
             user.RoleUser = Role.Sommelier;
-
-            // 5. Guardamos
             await _userRepository.UpdateAsync(user);
+
+            return _authentication.GenerateToken(user);
+
         }
 
-        public async Task DownGradeToUserAsync()
+        public async Task<string> DownGradeToUserAsync()
         {
             var userId = _current.UserId;
             var user = await _userRepository.GetByIdAsync(userId);
@@ -114,6 +112,8 @@ namespace Application.Services
 
             user.RoleUser = Role.User;
             await _userRepository.UpdateAsync(user);
+
+            return _authentication.GenerateToken(user);
         }
 
         public async Task DeleteUserAsync(Guid id)
@@ -172,39 +172,54 @@ namespace Application.Services
             return u?.ToDto();
         }
 
-        
+
 
         public async Task<UserDto> CreateUserAsync(UserCreateDto dto)
         {
-            // Validaciones
+            // 1. Validaciones iniciales
             if (dto is null) throw new ArgumentNullException(nameof(dto));
             if (string.IsNullOrWhiteSpace(dto.Email)) throw new ArgumentException("Email requerido.");
             if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
                 throw new ArgumentException("La contraseña debe tener al menos 6 caracteres.");
 
-            var email = dto.Email.Trim();
+            var email = dto.Email.Trim().ToLower();
 
-            // Verificar duplicados
+            // 2. Verificar duplicados
             var existing = await _userRepository.GetByEmailAsync(email);
             if (existing != null)
                 throw new InvalidOperationException("El email ya está en uso.");
 
-            // Crear Entidad
+            Role roleToAssign = Role.User; // Valor por defecto
+
+            if (!string.IsNullOrEmpty(dto.Rol))
+            {
+                if (Enum.TryParse<Role>(dto.Rol, true, out var parsedRole))
+                {
+                    if (parsedRole != Role.User && _current.Role != Role.Admin)
+                    {
+                        throw new UnauthorizedAccessException("No tienes permisos para asignar un rol superior al de Usuario.");
+                    }
+
+                    if (_current.Role == Role.Admin)
+                    {
+                        roleToAssign = parsedRole;
+                    }
+                }
+            }
+
             var user = new User
             {
                 Email = email,
                 FullName = dto.FullName,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                RoleUser = Role.User,
+                RoleUser = roleToAssign
             };
 
-            // Hashear Password
+            // 5. Seguridad y persistencia
             user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
-
             var addedUser = await _userRepository.AddAsync(user);
-
             return addedUser.ToDto();
         }
 

@@ -17,8 +17,8 @@ namespace Application.Interfaces
         Task<UserDto?> GetByIdAsync(int id);
 
         Task<UserProfileDto> GetUserByIdAsync(Guid id);
-        Task UpgradeToSommelierAsync();
-        Task DownGradeToUserAsync();
+        Task<string> UpgradeToSommelierAsync();
+        Task<string> DownGradeToUserAsync();
 
         Task<List<UserProfileDto>> GetAllUsersAsync();
 

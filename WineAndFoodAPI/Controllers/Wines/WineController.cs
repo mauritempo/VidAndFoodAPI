@@ -123,6 +123,28 @@ namespace WineAndFoodAPI.Controllers.Wines
             }
         }
 
+        [HttpDelete("{ratingId:guid}/admin-rate-delete")]
+        public async Task<IActionResult> DeleteRateAdmin(Guid ratingId)
+        {
+            try
+            {
+                await _ratingService.DeleteRateByAdmin(ratingId);
+                return Ok(new { message = "Rating eliminado correctamente (Soft Delete)." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(); // 403
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Error interno al procesar la eliminación." });
+            }
+        }
+
         // ==========================================================
         // UPDATE WINE (ADMIN)
         // ==========================================================
