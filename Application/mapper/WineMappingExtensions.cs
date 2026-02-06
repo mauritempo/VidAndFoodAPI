@@ -49,7 +49,6 @@ namespace Application.mapper
                 ImageUrl = entity.LabelImageUrl,
                 AverageScore = entity.AverageScore,
                 IsActive = entity.IsActive,
-                IsWineDiscontinued = !entity.IsActive,
                 // Mapeo de la lista de uvas
                 Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
                 {
@@ -74,9 +73,13 @@ namespace Application.mapper
                 ImageUrl = entity.LabelImageUrl,
                 AverageScore = entity.AverageScore,
                 // Concatenamos las uvas para mostrar algo rápido en la tabla
-                GrapeNames = string.Join(", ", entity.WineGrapeVarieties.Select(wg => wg.Grape.Name)),
-                IsWineDiscontinued = !entity.IsActive,
-                IsActive = entity.IsActive,
+                Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
+                {
+                    Id = g.GrapeId,
+                    Name = g.Grape?.Name ?? "Sin nombre"
+                }).ToList() ?? new List<GrapeResponseDto>(),
+
+                IsActive = !entity.IsActive,
                 CreatedAt = entity.CreatedAt,
 
                 Reviews = entity.Ratings?
@@ -111,11 +114,13 @@ namespace Application.mapper
                 Aroma = entity.Aroma,
                 NotesTaste = entity.TastingNotes,
 
-                GrapeNames = string.Join(", ", entity.WineGrapeVarieties?
-                    .Where(wg => wg?.Grape != null)
-                    .Select(wg => wg.Grape.Name) ?? Array.Empty<string>()),
+                Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
+                {
+                    Id = g.GrapeId,
+                    Name = g.Grape?.Name ?? "Sin nombre"
+                }).ToList() ?? new List<GrapeResponseDto>(),
 
-                IsWineDiscontinued = !entity.IsActive,
+                IsActive = !entity.IsActive,
 
                 Reviews = entity.Ratings?
                     .Where(r => r != null) 
@@ -127,7 +132,8 @@ namespace Application.mapper
                         Score = r.Score,
                         Review = r.Review ?? string.Empty,
                         CreatedAt = r.UpdatedAt ?? r.CreatedAt,
-                        IsSommelierReview = r.IsSommelier
+                        IsSommelierReview = r.IsSommelier,
+                        IsActive = r.IsActive
                     })
                     .OrderByDescending(r => r.IsSommelierReview)
                     .ThenByDescending(r => r.CreatedAt)
