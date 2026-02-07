@@ -20,9 +20,10 @@ namespace Application.Models.Response.Wines
         public int VintageYear { get; set; }
         public string? ImageUrl { get; set; }
         public double AverageScore { get; set; }
-        public string GrapeNames { get; set; } = string.Empty;
-        public bool IsWineDiscontinued { get; set; }
+        public List<GrapeResponseDto> Grapes { get; set; } = new();
+        public bool IsActive { get; set; }
         public List<WineReviewDto> Reviews { get; set; }
+
 
     }
 }

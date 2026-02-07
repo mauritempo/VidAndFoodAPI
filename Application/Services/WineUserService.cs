@@ -56,11 +56,13 @@ namespace Application.Services
                 return;
             }
 
-            var count = await _wineUserRepository.CountHistoryAsync(userId);
-
-            if(count >= 5)
+            if (_currentUser.Role == Role.User)
             {
-                throw new InvalidOperationException("Historial lleno: solo podes tener hasta 5 vinos en tu historial.");
+                var count = await _wineUserRepository.CountHistoryAsync(userId);
+                if (count >= 5)
+                {
+                    throw new InvalidOperationException("Historial lleno: solo podes tener hasta 5 vinos en tu historial.");
+                }
             }
 
             var newHistory = new WineUser
