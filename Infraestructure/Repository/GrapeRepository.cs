@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +22,11 @@ namespace Infrastructure.Repository
             return await _context.Set<Grape>()
                 .Include(g => g.WineGrapeVarieties)
                 .FirstOrDefaultAsync(g => g.UuId == id);
+        }
+
+        public async Task<int> CountAsync(Expression<Func<Grape, bool>> predicate)
+        {
+            return await _context.Set<Grape>().CountAsync(predicate);
         }
         public async Task<bool> ExistsByNameAsync(string name, Guid? excludeId = null)
         {

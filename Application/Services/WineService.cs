@@ -16,13 +16,14 @@ namespace Application.Services
     {
         private readonly IWineRepository _wineRepository;
         private readonly ICurrentUser _currentUser;
+        private readonly IGrapeRepository _grapeRepository;
        
 
-        public WineService(IWineRepository wineRepository, ICurrentUser currentUser)
+        public WineService(IWineRepository wineRepository, ICurrentUser currentUser, IGrapeRepository grapeRepository)
         {
             _wineRepository = wineRepository;
             _currentUser = currentUser;
-            
+            _grapeRepository = grapeRepository;
         }
 
         // ==========================================================
@@ -31,16 +32,30 @@ namespace Application.Services
 
         public async Task<WineDetailDto> CreateWine(CreateWineRequest request)
         {
-            var userRole = _currentUser.Role;
-            if (userRole != Role.Admin)
+            // 1. Validar Rol
+            if (_currentUser.Role != Role.Admin)
             {
-                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden Crear");
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden crear registros.");
             }
+
+            var uniqueGrapeIds = request.Grapes?.Distinct().ToList() ?? new List<Guid>();
+
+            
+            if (uniqueGrapeIds.Any())
+            {
+                // Asumiendo un método que cuente cuántos de esos IDs existen en BD
+                var count = await _grapeRepository.CountAsync(g => uniqueGrapeIds.Contains(g.UuId));
+                if (count != uniqueGrapeIds.Count)
+                {
+                    throw new InvalidOperationException("Una o más uvas seleccionadas no existen en la base de datos.");
+                }
+            }
+            
             var wine = request.ToEntity();
 
-            if (request.Grapes != null && request.Grapes.Any())
+            if (uniqueGrapeIds.Any())
             {
-                foreach (var grapeId in request.Grapes)
+                foreach (var grapeId in uniqueGrapeIds)
                 {
                     wine.WineGrapeVarieties.Add(new WineGrapeVariety
                     {

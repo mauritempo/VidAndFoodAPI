@@ -119,7 +119,20 @@ namespace WineAndFoodAPI.Controllers.Wines
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error interno: " + ex.Message });
+                // Esto va a profundizar hasta encontrar el error real de SQL
+                var inner = ex.InnerException;
+                while (inner != null && inner.InnerException != null)
+                {
+                    inner = inner.InnerException;
+                }
+
+                var errorMessage = inner != null ? inner.Message : ex.Message;
+
+                return StatusCode(500, new
+                {
+                    message = "ERROR REAL: " + errorMessage, // <--- Esto nos dirá qué columna falla
+                    type = ex.GetType().Name
+                });
             }
         }
 
