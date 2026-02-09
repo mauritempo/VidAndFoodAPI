@@ -11,6 +11,8 @@ namespace Application.Models.Request.Wines
         public string Name { get; set; } = string.Empty;
         public string WineryName { get; set; } = string.Empty;
         public string RegionName { get; set; } = string.Empty;
+
+        public string CountryName { get; set; } = string.Empty;
         public int VintageYear { get; set; }
         public decimal? Price { get; set; }
         public string? Description { get; set; }

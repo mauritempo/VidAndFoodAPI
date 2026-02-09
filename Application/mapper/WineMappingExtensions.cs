@@ -23,6 +23,10 @@ namespace Application.mapper
                 Name = request.Name,
                 WineryName = request.WineryName,
                 RegionName = request.RegionName,
+
+                CountryName = request.CountryName,
+
+
                 VintageYear = request.VintageYear,
                 Price = request.Price,
                 LabelImageUrl = request.ImageUrl,
@@ -120,7 +124,7 @@ namespace Application.mapper
                     Name = g.Grape?.Name ?? "Sin nombre"
                 }).ToList() ?? new List<GrapeResponseDto>(),
 
-                IsActive = !entity.IsActive,
+                IsActive = entity.IsActive,
 
                 Reviews = entity.Ratings?
                     .Where(r => r != null) 
