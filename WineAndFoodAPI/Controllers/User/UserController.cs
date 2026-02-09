@@ -77,12 +77,11 @@ namespace WineAndFoodAPI.Controllers.User
         {
             try
             {
-                await _service.DownGradeToUserAsync();
-
-                return Ok(new
+                var newToken = await _service.DownGradeToUserAsync();
+                return Ok(new UpgradeDowngradeDto
                 {
-                    message = "Suscripción cancelada exitosamente. Tu cuenta ha vuelto al plan Básico.",
-                    requiresLogout = true
+                    Message = "¡Felicidades! Tu cuenta ha sido actualizada a Sommelier.",
+                    Token = newToken
                 });
             }
             catch (KeyNotFoundException ex)
