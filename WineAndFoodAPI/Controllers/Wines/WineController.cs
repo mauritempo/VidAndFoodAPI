@@ -97,7 +97,6 @@ namespace WineAndFoodAPI.Controllers.Wines
         }
 
         [HttpPost("admin-create")]
-        [Authorize] // Asegura que esté logueado (el servicio valida si es Admin)
         public async Task<IActionResult> CreateWine([FromBody] CreateWineRequest request)
         {
             if (!ModelState.IsValid)

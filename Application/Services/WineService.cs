@@ -33,9 +33,9 @@ namespace Application.Services
         public async Task<WineDetailDto> CreateWine(CreateWineRequest request)
         {
             // 1. Validar Rol
-            if (_currentUser.Role != Role.Admin)
+            if (_currentUser.Role != Role.Admin  && _currentUser.Role != Role.Sommelier)
             {
-                throw new UnauthorizedAccessException("Acceso denegado. Solo los administradores pueden crear registros.");
+                throw new UnauthorizedAccessException("Acceso denegado. Solo los Sommeliers pueden crear vinos.");
             }
 
             var uniqueGrapeIds = request.Grapes?.Distinct().ToList() ?? new List<Guid>();
