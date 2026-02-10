@@ -51,7 +51,7 @@ namespace Infrastructure
                 b.Property(x => x.WineryName).HasMaxLength(160);
                 b.Property(x => x.RegionName).HasMaxLength(160);
                 b.Property(x => x.CountryName).HasMaxLength(160);
-                b.Property(x => x.LabelImageUrl).HasMaxLength(512);
+                b.Property(x => x.LabelImageUrl).HasMaxLength(2048);
                 b.Property(x => x.TastingNotes).HasMaxLength(2048);
                 b.Property(x => x.Aroma).HasMaxLength(1024);
                 b.HasIndex(x => new { x.Name, x.VintageYear });
