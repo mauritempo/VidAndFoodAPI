@@ -172,6 +172,7 @@ namespace Infrastructure.Repository
                     .ThenInclude(wg => wg.Grape)
                     .AsSplitQuery()
                 .Where(w => w.IsActive == true)
+                .OrderByDescending(w=>w.CreatedAt)
                 .ToListAsync();
         }
 

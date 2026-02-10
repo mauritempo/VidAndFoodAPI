@@ -23,9 +23,10 @@ namespace Application.mapper
                 Name = request.Name,
                 WineryName = request.WineryName,
                 RegionName = request.RegionName,
-
+                WineType = request.wineType,
                 CountryName = request.CountryName,
-
+                TastingNotes = request.notesTaste,
+                Aroma = request.aroma,
 
                 VintageYear = request.VintageYear,
                 Price = request.Price,
@@ -48,6 +49,8 @@ namespace Application.mapper
                 RegionName = entity.RegionName,
                 VintageYear = entity.VintageYear,
                 Price = entity.Price,
+                wineType = entity.WineType,
+
                 NotesTaste = entity.TastingNotes ?? "",
                 Aroma = entity.Aroma ?? "",
                 ImageUrl = entity.LabelImageUrl,
@@ -76,6 +79,7 @@ namespace Application.mapper
                 VintageYear = entity.VintageYear,
                 ImageUrl = entity.LabelImageUrl,
                 AverageScore = entity.AverageScore,
+                wineType = entity.WineType,
                 // Concatenamos las uvas para mostrar algo rápido en la tabla
                 Grapes = entity.WineGrapeVarieties?.Select(g => new GrapeResponseDto
                 {
@@ -83,7 +87,7 @@ namespace Application.mapper
                     Name = g.Grape?.Name ?? "Sin nombre"
                 }).ToList() ?? new List<GrapeResponseDto>(),
 
-                IsActive = !entity.IsActive,
+                IsActive = entity.IsActive,
                 CreatedAt = entity.CreatedAt,
 
                 Reviews = entity.Ratings?
@@ -115,6 +119,7 @@ namespace Application.mapper
                 VintageYear = entity.VintageYear,
                 ImageUrl = entity.LabelImageUrl,
                 AverageScore = entity.AverageScore,
+                wineType = entity.WineType,
                 Aroma = entity.Aroma,
                 NotesTaste = entity.TastingNotes,
 

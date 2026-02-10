@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Entities.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,9 @@ namespace Application.Models.Request.Wines
         public string WineryName { get; set; } = string.Empty;
         public string RegionName { get; set; } = string.Empty;
 
+        public WineType wineType { get; set; } 
+        public string? notesTaste { get; set; } = string.Empty;
+        public string? aroma { get; set; } = string.Empty;
         public string CountryName { get; set; } = string.Empty;
         public int VintageYear { get; set; }
         public decimal? Price { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Application.Models.Response.Rating;
+using Domain.Entities.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Application.Models.Response.Wines
         public string Name { get; set; } = string.Empty;
         public string WineryName { get; set; } = string.Empty;
         public string RegionName { get; set; } = string.Empty;
+        public WineType wineType { get; set; }
 
         public string? NotesTaste { get; set; } = string.Empty;
         public string? Aroma { get; set; } = string.Empty;
